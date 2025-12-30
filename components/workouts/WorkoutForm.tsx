@@ -200,6 +200,8 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
   );
 });
 
+WorkoutForm.displayName = 'WorkoutForm';
+
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,

@@ -22,7 +22,7 @@ export default function HistoryScreen() {
         </TouchableOpacity>
       ),
     });
-  }, [navigation]);
+  }, [navigation, router]);
 
   useFocusEffect(
     useCallback(() => {
