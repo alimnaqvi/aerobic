@@ -2,9 +2,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog, WorkoutType, Zone } from '@/types/workout';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Button, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { Alert, Button, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 export default function LogScreen() {
   const router = useRouter();
@@ -17,17 +18,13 @@ export default function LogScreen() {
   const [calories, setCalories] = useState('');
   const [elevation, setElevation] = useState('');
   const [notes, setNotes] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleSave = async () => {
-    if (!duration) {
-      Alert.alert('Error', 'Please enter duration');
-      return;
-    }
-
     const newWorkout: WorkoutLog = {
       id: Date.now().toString(),
-      date,
+      date: date.toISOString().split('T')[0],
       type,
       zone,
       durationMinutes: parseInt(duration) || 0,
@@ -55,20 +52,42 @@ export default function LogScreen() {
     router.push('/');
   };
 
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+    setDate(currentDate);
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.header}>Log Workout</ThemedText>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ThemedView style={styles.container}>
+          <ThemedText type="title" style={styles.header}>Log Workout</ThemedText>
 
-        <ThemedText type="subtitle">Date</ThemedText>
-        <TextInput
-          style={styles.input}
-          value={date}
-          onChangeText={setDate}
-          placeholder="YYYY-MM-DD"
-        />
+          <ThemedText type="subtitle">Date</ThemedText>
+          {Platform.OS === 'android' && (
+            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+              <ThemedText>{date.toISOString().split('T')[0]}</ThemedText>
+            </TouchableOpacity>
+          )}
+          {(showDatePicker || Platform.OS === 'ios') && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode="date"
+              display="default"
+              onChange={onDateChange}
+              style={styles.datePicker}
+            />
+          )}
 
-        <ThemedText type="subtitle">Type</ThemedText>
+          <ThemedText type="subtitle">Type</ThemedText>
         <ThemedView style={styles.row}>
           {(['Running', 'Cycling', 'Other'] as WorkoutType[]).map((t) => (
             <Button
@@ -157,7 +176,8 @@ export default function LogScreen() {
 
         <Button title="Save Workout" onPress={handleSave} />
       </ThemedView>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -173,6 +193,18 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 20,
     textAlign: 'center',
+  },
+  dateButton: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    backgroundColor: '#fff',
+    marginBottom: 10,
+  },
+  datePicker: {
+    marginBottom: 10,
+    alignSelf: 'flex-start',
   },
   input: {
     borderWidth: 1,
