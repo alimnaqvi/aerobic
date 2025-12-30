@@ -172,7 +172,7 @@ export default function HistoryScreen() {
         transparent={true}
         visible={menuVisible}
         onRequestClose={closeMenu}
-        animationType="fade"
+        animationType="none"
       >
         <Pressable style={styles.modalOverlay} onPress={closeMenu}>
           <View style={[styles.menuDropdown, { top: menuPosition.top, right: menuPosition.right, backgroundColor: menuBg, borderColor }]}>
