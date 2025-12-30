@@ -5,13 +5,15 @@ import { StorageService } from '@/services/storage';
 import { WorkoutLog, Zone } from '@/types/workout';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, GestureResponderEvent, Modal, Pressable, SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function HistoryScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const [sections, setSections] = useState<{ title: Zone; data: WorkoutLog[] }[]>([]);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+  const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
 
   useEffect(() => {
     navigation.setOptions({
@@ -44,6 +46,7 @@ export default function HistoryScreen() {
   };
 
   const handleDelete = async (id: string) => {
+    closeMenu();
     Alert.alert(
       'Delete Workout',
       'Are you sure you want to delete this workout?',
@@ -62,38 +65,39 @@ export default function HistoryScreen() {
   };
 
   const handleEdit = (id: string) => {
+    closeMenu();
     router.push({ pathname: '/edit-workout', params: { id } });
-    setExpandedId(null);
   };
 
-  const toggleMenu = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
+  const openMenu = (event: GestureResponderEvent, id: string) => {
+    const { pageY } = event.nativeEvent;
+    setMenuPosition({ top: pageY + 10, right: 16 });
+    setActiveWorkoutId(id);
+    setMenuVisible(true);
+  };
+
+  const closeMenu = () => {
+    setMenuVisible(false);
+    setActiveWorkoutId(null);
+  };
+
+  const formatDate = (dateStr: string) => {
+    const [y, m, d] = dateStr.split('-');
+    const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const renderItem = ({ item }: { item: WorkoutLog }) => (
-    <View style={[styles.card, { zIndex: expandedId === item.id ? 100 : 1 }]}>
+    <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View>
-          <ThemedText type="defaultSemiBold" style={styles.dateText}>{item.date}</ThemedText>
+          <ThemedText type="defaultSemiBold" style={styles.dateText}>{formatDate(item.date)}</ThemedText>
           <ThemedText style={styles.typeText}>{item.type}</ThemedText>
         </View>
-        <TouchableOpacity onPress={() => toggleMenu(item.id)} style={styles.menuButton}>
+        <TouchableOpacity onPress={(e) => openMenu(e, item.id)} style={styles.menuButton}>
           <IconSymbol name="ellipsis" size={20} color="#666" />
         </TouchableOpacity>
       </View>
-
-      {expandedId === item.id && (
-        <View style={styles.menuDropdown}>
-          <TouchableOpacity style={styles.menuItem} onPress={() => handleEdit(item.id)}>
-            <IconSymbol name="pencil" size={16} color="#0a7ea4" />
-            <ThemedText style={styles.menuText}>Edit</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => handleDelete(item.id)}>
-            <IconSymbol name="trash" size={16} color="#ff3b30" />
-            <ThemedText style={[styles.menuText, { color: '#ff3b30' }]}>Delete</ThemedText>
-          </TouchableOpacity>
-        </View>
-      )}
 
       <View style={styles.metricsContainer}>
         {item.watts ? (
@@ -155,12 +159,26 @@ export default function HistoryScreen() {
           </ThemedView>
         }
       />
-      {expandedId && (
-        <Pressable 
-          style={StyleSheet.absoluteFill} 
-          onPress={() => setExpandedId(null)} 
-        />
-      )}
+      
+      <Modal
+        transparent={true}
+        visible={menuVisible}
+        onRequestClose={closeMenu}
+        animationType="fade"
+      >
+        <Pressable style={styles.modalOverlay} onPress={closeMenu}>
+          <View style={[styles.menuDropdown, { top: menuPosition.top, right: menuPosition.right }]}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => activeWorkoutId && handleEdit(activeWorkoutId)}>
+              <IconSymbol name="pencil" size={16} color="#0a7ea4" />
+              <ThemedText style={styles.menuText}>Edit</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => activeWorkoutId && handleDelete(activeWorkoutId)}>
+              <IconSymbol name="trash" size={16} color="#ff3b30" />
+              <ThemedText style={[styles.menuText, { color: '#ff3b30' }]}>Delete</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -212,10 +230,12 @@ const styles = StyleSheet.create({
   menuButton: {
     padding: 4,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+  },
   menuDropdown: {
     position: 'absolute',
-    top: 40,
-    right: 10,
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 4,
@@ -224,7 +244,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    zIndex: 100,
     borderWidth: 1,
     borderColor: '#eee',
     minWidth: 120,
