@@ -19,7 +19,7 @@ export default function EditWorkoutScreen() {
       headerRight: () => (
         <Button title="Save" onPress={() => formRef.current?.submit()} />
         // <TouchableOpacity onPress={() => formRef.current?.submit()} style={{ marginRight: 10 }}>
-        //   <IconSymbol name="checkmark" size={24} color="#0a7ea4" />
+        //   <IconSymbol name="checkmark" size={28} color="#0a7ea4" />
         // </TouchableOpacity>
       ),
     });

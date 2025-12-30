@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { WorkoutCalendar } from '@/components/workouts/WorkoutCalendar';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog, Zone } from '@/types/workout';
@@ -12,7 +13,9 @@ export default function HistoryScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const [sections, setSections] = useState<{ title: Zone; data: WorkoutLog[] }[]>([]);
+  const [allWorkouts, setAllWorkouts] = useState<WorkoutLog[]>([]);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [calendarVisible, setCalendarVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
 
@@ -26,12 +29,12 @@ export default function HistoryScreen() {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity onPress={() => router.push('/log')} style={{ marginRight: 10 }}>
-          <IconSymbol name="plus" size={24} color="#0a7ea4" />
+        <TouchableOpacity onPress={() => setCalendarVisible(true)} style={{ marginRight: 10 }}>
+          <IconSymbol name="calendar" size={28} color="#0a7ea4" />
         </TouchableOpacity>
       ),
     });
-  }, [navigation, router]);
+  }, [navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -41,6 +44,7 @@ export default function HistoryScreen() {
 
   const loadWorkouts = async () => {
     const workouts = await StorageService.getWorkouts();
+    setAllWorkouts(workouts);
     
     // Group by Zone
     const zone2 = workouts.filter(w => w.zone === 'Zone 2').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -187,6 +191,12 @@ export default function HistoryScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      <WorkoutCalendar
+        visible={calendarVisible}
+        onClose={() => setCalendarVisible(false)}
+        workouts={allWorkouts}
+      />
     </View>
   );
 }

@@ -31,6 +31,7 @@ const MAPPING = {
   'list.bullet': 'format-list-bulleted',
   'plus.circle.fill': 'add-circle',
   'gear': 'settings',
+  'calendar': 'calendar-today',
 } as IconMapping;
 
 /**
