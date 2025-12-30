@@ -1,10 +1,9 @@
-import { ThemedView } from '@/components/themed-view';
 import { WorkoutForm, WorkoutFormRef } from '@/components/workouts/WorkoutForm';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog } from '@/types/workout';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, Button } from 'react-native';
+import { Alert, Button } from 'react-native';
 
 export default function EditWorkoutScreen() {
   const router = useRouter();
@@ -50,18 +49,7 @@ export default function EditWorkoutScreen() {
   if (!workout) return null;
 
   return (
-    <ThemedView style={styles.container}>
-      <WorkoutForm ref={formRef} initialValues={workout} onSubmit={handleSave} submitLabel="Update Workout" />
-    </ThemedView>
+    <WorkoutForm ref={formRef} initialValues={workout} onSubmit={handleSave} submitLabel="Update Workout" />
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-});

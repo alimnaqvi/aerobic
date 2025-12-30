@@ -9,13 +9,14 @@ interface WorkoutFormProps {
   initialValues?: WorkoutLog;
   onSubmit: (workout: WorkoutLog) => void;
   submitLabel: string;
+  title?: string;
 }
 
 export interface WorkoutFormRef {
   submit: () => void;
 }
 
-export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initialValues, onSubmit, submitLabel }, ref) => {
+export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initialValues, onSubmit, submitLabel, title }, ref) => {
   const [type, setType] = useState<WorkoutType>(initialValues?.type || 'Running');
   const [zone, setZone] = useState<Zone>(initialValues?.zone || 'Zone 2');
   const [duration, setDuration] = useState(initialValues?.durationMinutes?.toString() || '');
@@ -65,6 +66,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <ThemedView style={styles.container}>
+          {title && <ThemedText type="title" style={styles.header}>{title}</ThemedText>}
           
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Date</ThemedText>
@@ -255,13 +257,16 @@ const styles = StyleSheet.create({
   datePicker: {
     alignSelf: 'flex-end',
   },
+  header: {
+    marginBottom: 20,
+    textAlign: 'center',
+  },
   segmentedControl: {
     flexDirection: 'row',
     backgroundColor: '#eee',
     borderRadius: 8,
     padding: 2,
-    flex: 1,
-    justifyContent: 'flex-end',
+    marginLeft: 10,
   },
   segmentButton: {
     paddingVertical: 6,

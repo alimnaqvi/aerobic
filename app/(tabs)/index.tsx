@@ -5,8 +5,7 @@ import { StorageService } from '@/services/storage';
 import { WorkoutLog, Zone } from '@/types/workout';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Alert, Pressable, SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function HistoryScreen() {
   const router = useRouter();
@@ -72,7 +71,7 @@ export default function HistoryScreen() {
   };
 
   const renderItem = ({ item }: { item: WorkoutLog }) => (
-    <View style={styles.card}>
+    <View style={[styles.card, { zIndex: expandedId === item.id ? 100 : 1 }]}>
       <View style={styles.cardHeader}>
         <View>
           <ThemedText type="defaultSemiBold" style={styles.dateText}>{item.date}</ThemedText>
@@ -142,20 +141,27 @@ export default function HistoryScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         renderSectionHeader={renderSectionHeader}
         contentContainerStyle={styles.listContent}
+        stickySectionHeadersEnabled={true}
         ListEmptyComponent={
           <ThemedView style={styles.emptyContainer}>
             <ThemedText>No workouts logged yet.</ThemedText>
           </ThemedView>
         }
       />
-    </SafeAreaView>
+      {expandedId && (
+        <Pressable 
+          style={StyleSheet.absoluteFill} 
+          onPress={() => setExpandedId(null)} 
+        />
+      )}
+    </View>
   );
 }
 
@@ -168,7 +174,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#f8f9fa',
     paddingVertical: 10,
     marginBottom: 5,
   },

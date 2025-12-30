@@ -1,11 +1,10 @@
 // import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { WorkoutForm, WorkoutFormRef } from '@/components/workouts/WorkoutForm';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog } from '@/types/workout';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Alert, StyleSheet, Button } from 'react-native';
+import { Alert, Button } from 'react-native';
 
 export default function LogScreen() {
   const router = useRouter();
@@ -30,19 +29,7 @@ export default function LogScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      {/* <ThemedText type="title" style={styles.header}>Log Workout</ThemedText> */}
-      <WorkoutForm ref={formRef} onSubmit={handleSave} submitLabel="Save Workout" />
-    </ThemedView>
+    <WorkoutForm ref={formRef} onSubmit={handleSave} submitLabel="Save Workout" />
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-});
