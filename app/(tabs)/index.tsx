@@ -3,15 +3,26 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog, Zone } from '@/types/workout';
-import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HistoryScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const [sections, setSections] = useState<{ title: Zone; data: WorkoutLog[] }[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity onPress={() => router.push('/log')} style={{ marginRight: 10 }}>
+          <IconSymbol name="plus" size={24} color="#0a7ea4" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -86,36 +97,36 @@ export default function HistoryScreen() {
       )}
 
       <View style={styles.metricsContainer}>
-        {item.watts && (
+        {item.watts ? (
           <View style={styles.metric}>
             <IconSymbol name="bolt.fill" size={14} color="#666" />
             <ThemedText style={styles.metricText}>{item.watts}W</ThemedText>
           </View>
-        )}
-        {item.durationMinutes && (
+        ) : null}
+        {item.durationMinutes ? (
           <View style={styles.metric}>
             <IconSymbol name="clock" size={14} color="#666" />
             <ThemedText style={styles.metricText}>{item.durationMinutes}m</ThemedText>
           </View>
-        )}
-        {item.distanceKm && (
+        ) : null}
+        {item.distanceKm ? (
           <View style={styles.metric}>
             <IconSymbol name="map" size={14} color="#666" />
             <ThemedText style={styles.metricText}>{item.distanceKm}km</ThemedText>
           </View>
-        )}
-        {item.heartRate && (
+        ) : null}
+        {item.heartRate ? (
           <View style={styles.metric}>
             <IconSymbol name="heart.fill" size={14} color="#ff3b30" />
             <ThemedText style={styles.metricText}>{item.heartRate}bpm</ThemedText>
           </View>
-        )}
-        {item.calories && (
+        ) : null}
+        {item.calories ? (
           <View style={styles.metric}>
             <IconSymbol name="flame.fill" size={14} color="#ff9500" />
             <ThemedText style={styles.metricText}>{item.calories}cal</ThemedText>
           </View>
-        )}
+        ) : null}
       </View>
       
       {item.notes && (

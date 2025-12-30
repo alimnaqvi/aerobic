@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WorkoutLog, WorkoutType, Zone } from '@/types/workout';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import React, { useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { Button, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface WorkoutFormProps {
@@ -11,7 +11,11 @@ interface WorkoutFormProps {
   submitLabel: string;
 }
 
-export function WorkoutForm({ initialValues, onSubmit, submitLabel }: WorkoutFormProps) {
+export interface WorkoutFormRef {
+  submit: () => void;
+}
+
+export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initialValues, onSubmit, submitLabel }, ref) => {
   const [type, setType] = useState<WorkoutType>(initialValues?.type || 'Running');
   const [zone, setZone] = useState<Zone>(initialValues?.zone || 'Zone 2');
   const [duration, setDuration] = useState(initialValues?.durationMinutes?.toString() || '');
@@ -40,6 +44,10 @@ export function WorkoutForm({ initialValues, onSubmit, submitLabel }: WorkoutFor
     };
     onSubmit(workout);
   };
+
+  useImperativeHandle(ref, () => ({
+    submit: handleSubmit
+  }));
 
   const onDateChange = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
@@ -98,6 +106,7 @@ export function WorkoutForm({ initialValues, onSubmit, submitLabel }: WorkoutFor
             <ThemedText type="subtitle" style={styles.label}>Zone</ThemedText>
             <View style={styles.segmentedControl}>
               {(['Zone 2', 'Zone 5'] as Zone[]).map((z) => (
+
                 <TouchableOpacity
                   key={z}
                   style={[styles.segmentButton, zone === z && styles.segmentButtonActive]}
@@ -189,7 +198,7 @@ export function WorkoutForm({ initialValues, onSubmit, submitLabel }: WorkoutFor
       </ScrollView>
     </KeyboardAvoidingView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   scrollContainer: {
