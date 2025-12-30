@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { WorkoutLog, WorkoutType, Zone } from '@/types/workout';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
@@ -28,6 +29,15 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
   const [notes, setNotes] = useState(initialValues?.notes || '');
   const [date, setDate] = useState(initialValues?.date ? new Date(initialValues.date) : new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const inputBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
+  const inputBorder = useThemeColor({ light: '#ccc', dark: '#444' }, 'icon');
+  const textColor = useThemeColor({}, 'text');
+  const placeholderColor = useThemeColor({ light: '#999', dark: '#888' }, 'icon');
+  const segmentBg = useThemeColor({ light: '#eee', dark: '#333' }, 'background');
+  const segmentActiveBg = useThemeColor({ light: '#fff', dark: '#666' }, 'background');
+  const segmentTextColor = useThemeColor({ light: '#666', dark: '#aaa' }, 'text');
+  const segmentTextActiveColor = useThemeColor({ light: '#000', dark: '#fff' }, 'text');
 
   const handleSubmit = () => {
     const workout: WorkoutLog = {
@@ -58,6 +68,11 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
     setDate(currentDate);
   };
 
+  const inputStyle = [
+    styles.input, 
+    { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }
+  ];
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -72,7 +87,10 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
             <ThemedText type="subtitle" style={styles.label}>Date</ThemedText>
             <View style={styles.inputContainer}>
               {Platform.OS === 'android' && (
-                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+                <TouchableOpacity 
+                  onPress={() => setShowDatePicker(true)} 
+                  style={[styles.dateButton, { backgroundColor: inputBg, borderColor: inputBorder }]}
+                >
                   <ThemedText>{date.toISOString().split('T')[0]}</ThemedText>
                 </TouchableOpacity>
               )}
@@ -84,6 +102,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
                   display="default"
                   onChange={onDateChange}
                   style={styles.datePicker}
+                  themeVariant={inputBg === '#fff' ? 'light' : 'dark'}
                 />
               )}
             </View>
@@ -91,14 +110,18 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Type</ThemedText>
-            <View style={styles.segmentedControl}>
+            <View style={[styles.segmentedControl, { backgroundColor: segmentBg }]}>
               {(['Running', 'Cycling', 'Other'] as WorkoutType[]).map((t) => (
                 <TouchableOpacity
                   key={t}
-                  style={[styles.segmentButton, type === t && styles.segmentButtonActive]}
+                  style={[styles.segmentButton, type === t && { backgroundColor: segmentActiveBg }]}
                   onPress={() => setType(t)}
                 >
-                  <ThemedText style={[styles.segmentText, type === t && styles.segmentTextActive]}>{t}</ThemedText>
+                  <ThemedText style={[
+                    styles.segmentText, 
+                    { color: segmentTextColor },
+                    type === t && { color: segmentTextActiveColor, fontWeight: '600' }
+                  ]}>{t}</ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -106,15 +129,18 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Zone</ThemedText>
-            <View style={styles.segmentedControl}>
+            <View style={[styles.segmentedControl, { backgroundColor: segmentBg }]}>
               {(['Zone 2', 'Zone 5'] as Zone[]).map((z) => (
-
                 <TouchableOpacity
                   key={z}
-                  style={[styles.segmentButton, zone === z && styles.segmentButtonActive]}
+                  style={[styles.segmentButton, zone === z && { backgroundColor: segmentActiveBg }]}
                   onPress={() => setZone(z)}
                 >
-                  <ThemedText style={[styles.segmentText, zone === z && styles.segmentTextActive]}>{z}</ThemedText>
+                  <ThemedText style={[
+                    styles.segmentText, 
+                    { color: segmentTextColor },
+                    zone === z && { color: segmentTextActiveColor, fontWeight: '600' }
+                  ]}>{z}</ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -123,76 +149,83 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Duration (min)</ThemedText>
             <TextInput
-              style={styles.input}
+              style={inputStyle}
               value={duration}
               onChangeText={setDuration}
               keyboardType="numeric"
               placeholder="40"
+              placeholderTextColor={placeholderColor}
             />
           </View>
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Watts (avg)</ThemedText>
             <TextInput
-              style={styles.input}
+              style={inputStyle}
               value={watts}
               onChangeText={setWatts}
               keyboardType="numeric"
               placeholder="130"
+              placeholderTextColor={placeholderColor}
             />
           </View>
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Distance (km)</ThemedText>
             <TextInput
-              style={styles.input}
+              style={inputStyle}
               value={distance}
               onChangeText={setDistance}
               keyboardType="numeric"
               placeholder="5.0"
+              placeholderTextColor={placeholderColor}
             />
           </View>
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Heart Rate</ThemedText>
             <TextInput
-              style={styles.input}
+              style={inputStyle}
               value={heartRate}
               onChangeText={setHeartRate}
               keyboardType="numeric"
               placeholder="145"
+              placeholderTextColor={placeholderColor}
             />
           </View>
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Calories</ThemedText>
             <TextInput
-              style={styles.input}
+              style={inputStyle}
               value={calories}
               onChangeText={setCalories}
               keyboardType="numeric"
               placeholder="400"
+              placeholderTextColor={placeholderColor}
             />
           </View>
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Elevation (m)</ThemedText>
             <TextInput
-              style={styles.input}
+              style={inputStyle}
               value={elevation}
               onChangeText={setElevation}
               keyboardType="numeric"
               placeholder="0"
+              placeholderTextColor={placeholderColor}
             />
           </View>
 
           <ThemedText type="subtitle" style={styles.notesLabel}>Notes</ThemedText>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[inputStyle, styles.textArea]}
             value={notes}
             onChangeText={setNotes}
             multiline
             placeholder="Level 10 on gym machine..."
+            placeholderTextColor={placeholderColor}
           />
 
           <Button title={submitLabel} onPress={handleSubmit} />

@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog, Zone } from '@/types/workout';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
@@ -14,6 +15,13 @@ export default function HistoryScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
+
+  const containerBg = useThemeColor({ light: '#f8f9fa', dark: '#000000' }, 'background');
+  const cardBg = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
+  const menuBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
+  const metricBg = useThemeColor({ light: '#f5f5f5', dark: '#2C2C2E' }, 'background');
+  const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
+  const iconColor = useThemeColor({}, 'icon');
 
   useEffect(() => {
     navigation.setOptions({
@@ -88,44 +96,44 @@ export default function HistoryScreen() {
   };
 
   const renderItem = ({ item }: { item: WorkoutLog }) => (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: cardBg, borderColor }]}>
       <View style={styles.cardHeader}>
         <View>
           <ThemedText type="defaultSemiBold" style={styles.dateText}>{formatDate(item.date)}</ThemedText>
           <ThemedText style={styles.typeText}>{item.type}</ThemedText>
         </View>
         <TouchableOpacity onPress={(e) => openMenu(e, item.id)} style={styles.menuButton}>
-          <IconSymbol name="ellipsis" size={20} color="#666" />
+          <IconSymbol name="ellipsis" size={20} color={iconColor} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.metricsContainer}>
         {item.watts ? (
-          <View style={styles.metric}>
-            <IconSymbol name="bolt.fill" size={14} color="#666" />
+          <View style={[styles.metric, { backgroundColor: metricBg }]}>
+            <IconSymbol name="bolt.fill" size={14} color={iconColor} />
             <ThemedText style={styles.metricText}>{item.watts}W</ThemedText>
           </View>
         ) : null}
         {item.durationMinutes ? (
-          <View style={styles.metric}>
-            <IconSymbol name="clock" size={14} color="#666" />
+          <View style={[styles.metric, { backgroundColor: metricBg }]}>
+            <IconSymbol name="clock" size={14} color={iconColor} />
             <ThemedText style={styles.metricText}>{item.durationMinutes}m</ThemedText>
           </View>
         ) : null}
         {item.distanceKm ? (
-          <View style={styles.metric}>
-            <IconSymbol name="map" size={14} color="#666" />
+          <View style={[styles.metric, { backgroundColor: metricBg }]}>
+            <IconSymbol name="map" size={14} color={iconColor} />
             <ThemedText style={styles.metricText}>{item.distanceKm}km</ThemedText>
           </View>
         ) : null}
         {item.heartRate ? (
-          <View style={styles.metric}>
+          <View style={[styles.metric, { backgroundColor: metricBg }]}>
             <IconSymbol name="heart.fill" size={14} color="#ff3b30" />
             <ThemedText style={styles.metricText}>{item.heartRate}bpm</ThemedText>
           </View>
         ) : null}
         {item.calories ? (
-          <View style={styles.metric}>
+          <View style={[styles.metric, { backgroundColor: metricBg }]}>
             <IconSymbol name="flame.fill" size={14} color="#ff9500" />
             <ThemedText style={styles.metricText}>{item.calories}cal</ThemedText>
           </View>
@@ -139,13 +147,13 @@ export default function HistoryScreen() {
   );
 
   const renderSectionHeader = ({ section: { title } }: { section: { title: Zone } }) => (
-    <ThemedView style={styles.header}>
+    <ThemedView style={[styles.header, { backgroundColor: containerBg }]}>
       <ThemedText type="title" style={styles.headerText}>{title}</ThemedText>
     </ThemedView>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: containerBg }]}>
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
@@ -167,7 +175,7 @@ export default function HistoryScreen() {
         animationType="fade"
       >
         <Pressable style={styles.modalOverlay} onPress={closeMenu}>
-          <View style={[styles.menuDropdown, { top: menuPosition.top, right: menuPosition.right }]}>
+          <View style={[styles.menuDropdown, { top: menuPosition.top, right: menuPosition.right, backgroundColor: menuBg, borderColor }]}>
             <TouchableOpacity style={styles.menuItem} onPress={() => activeWorkoutId && handleEdit(activeWorkoutId)}>
               <IconSymbol name="pencil" size={16} color="#0a7ea4" />
               <ThemedText style={styles.menuText}>Edit</ThemedText>
