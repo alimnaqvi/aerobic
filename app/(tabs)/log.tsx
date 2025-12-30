@@ -1,0 +1,194 @@
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { StorageService } from '@/services/storage';
+import { WorkoutLog, WorkoutType, Zone } from '@/types/workout';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Button, ScrollView, StyleSheet, TextInput } from 'react-native';
+
+export default function LogScreen() {
+  const router = useRouter();
+  const [type, setType] = useState<WorkoutType>('Running');
+  const [zone, setZone] = useState<Zone>('Zone 2');
+  const [duration, setDuration] = useState('');
+  const [watts, setWatts] = useState('');
+  const [distance, setDistance] = useState('');
+  const [heartRate, setHeartRate] = useState('');
+  const [calories, setCalories] = useState('');
+  const [elevation, setElevation] = useState('');
+  const [notes, setNotes] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
+
+  const handleSave = async () => {
+    if (!duration) {
+      Alert.alert('Error', 'Please enter duration');
+      return;
+    }
+
+    const newWorkout: WorkoutLog = {
+      id: Date.now().toString(),
+      date,
+      type,
+      zone,
+      durationMinutes: parseInt(duration) || 0,
+      watts: watts ? parseInt(watts) : undefined,
+      distanceKm: distance ? parseFloat(distance) : undefined,
+      heartRate: heartRate ? parseInt(heartRate) : undefined,
+      calories: calories ? parseInt(calories) : undefined,
+      elevation: elevation ? parseInt(elevation) : undefined,
+      notes: notes || undefined,
+    };
+
+    await StorageService.addWorkout(newWorkout);
+    Alert.alert('Success', 'Workout saved!');
+    
+    // Reset form
+    setDuration('');
+    setWatts('');
+    setDistance('');
+    setHeartRate('');
+    setCalories('');
+    setElevation('');
+    setNotes('');
+    
+    // Navigate to history
+    router.push('/');
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ThemedView style={styles.container}>
+        <ThemedText type="title" style={styles.header}>Log Workout</ThemedText>
+
+        <ThemedText type="subtitle">Date</ThemedText>
+        <TextInput
+          style={styles.input}
+          value={date}
+          onChangeText={setDate}
+          placeholder="YYYY-MM-DD"
+        />
+
+        <ThemedText type="subtitle">Type</ThemedText>
+        <ThemedView style={styles.row}>
+          {(['Running', 'Cycling', 'Other'] as WorkoutType[]).map((t) => (
+            <Button
+              key={t}
+              title={t}
+              onPress={() => setType(t)}
+              color={type === t ? '#0a7ea4' : '#ccc'}
+            />
+          ))}
+        </ThemedView>
+
+        <ThemedText type="subtitle">Zone</ThemedText>
+        <ThemedView style={styles.row}>
+          {(['Zone 2', 'Zone 5'] as Zone[]).map((z) => (
+            <Button
+              key={z}
+              title={z}
+              onPress={() => setZone(z)}
+              color={zone === z ? '#0a7ea4' : '#ccc'}
+            />
+          ))}
+        </ThemedView>
+
+        <ThemedText type="subtitle">Duration (min)</ThemedText>
+        <TextInput
+          style={styles.input}
+          value={duration}
+          onChangeText={setDuration}
+          keyboardType="numeric"
+          placeholder="40"
+        />
+
+        <ThemedText type="subtitle">Watts (avg)</ThemedText>
+        <TextInput
+          style={styles.input}
+          value={watts}
+          onChangeText={setWatts}
+          keyboardType="numeric"
+          placeholder="130"
+        />
+
+        <ThemedText type="subtitle">Distance (km)</ThemedText>
+        <TextInput
+          style={styles.input}
+          value={distance}
+          onChangeText={setDistance}
+          keyboardType="numeric"
+          placeholder="5.0"
+        />
+
+        <ThemedText type="subtitle">Heart Rate (avg)</ThemedText>
+        <TextInput
+          style={styles.input}
+          value={heartRate}
+          onChangeText={setHeartRate}
+          keyboardType="numeric"
+          placeholder="145"
+        />
+
+        <ThemedText type="subtitle">Calories</ThemedText>
+        <TextInput
+          style={styles.input}
+          value={calories}
+          onChangeText={setCalories}
+          keyboardType="numeric"
+          placeholder="400"
+        />
+
+        <ThemedText type="subtitle">Elevation (m)</ThemedText>
+        <TextInput
+          style={styles.input}
+          value={elevation}
+          onChangeText={setElevation}
+          keyboardType="numeric"
+          placeholder="0"
+        />
+
+        <ThemedText type="subtitle">Notes</ThemedText>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+          placeholder="Level 10 on gym machine..."
+        />
+
+        <Button title="Save Workout" onPress={handleSave} />
+      </ThemedView>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+    gap: 10,
+  },
+  header: {
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
+    marginBottom: 10,
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+});
