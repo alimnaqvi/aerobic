@@ -1,11 +1,10 @@
 import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { WorkoutForm, WorkoutFormRef } from '@/components/workouts/WorkoutForm';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog } from '@/types/workout';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet, Button } from 'react-native';
 
 export default function EditWorkoutScreen() {
   const router = useRouter();
@@ -19,9 +18,10 @@ export default function EditWorkoutScreen() {
       title: 'Edit Workout',
       headerBackTitle: 'History',
       headerRight: () => (
-        <TouchableOpacity onPress={() => formRef.current?.submit()} style={{ marginRight: 10 }}>
-          <IconSymbol name="checkmark" size={24} color="#0a7ea4" />
-        </TouchableOpacity>
+        <Button title="Save" onPress={() => formRef.current?.submit()} />
+        // <TouchableOpacity onPress={() => formRef.current?.submit()} style={{ marginRight: 10 }}>
+        //   <IconSymbol name="checkmark" size={24} color="#0a7ea4" />
+        // </TouchableOpacity>
       ),
     });
   }, [navigation]);
