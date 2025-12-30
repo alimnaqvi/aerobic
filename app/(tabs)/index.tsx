@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 20,
-    color: '#333',
+    // color: '#333',
   },
   card: {
     backgroundColor: '#fff',
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontSize: 14,
-    color: '#666',
+    // color: '#666',
   },
   menuButton: {
     padding: 4,
@@ -282,11 +282,11 @@ const styles = StyleSheet.create({
   },
   metricText: {
     fontSize: 12,
-    color: '#444',
+    // color: '#444',
   },
   notesText: {
     fontSize: 13,
-    color: '#666',
+    // color: '#666',
     fontStyle: 'italic',
     marginTop: 4,
   },
