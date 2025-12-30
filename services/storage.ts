@@ -24,6 +24,26 @@ export const StorageService = {
     }
   },
 
+  async updateWorkout(updatedWorkout: WorkoutLog): Promise<void> {
+    try {
+      const existingWorkouts = await this.getWorkouts();
+      const newWorkouts = existingWorkouts.map(w => w.id === updatedWorkout.id ? updatedWorkout : w);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newWorkouts));
+    } catch (e) {
+      console.error('Failed to update workout', e);
+    }
+  },
+
+  async deleteWorkout(id: string): Promise<void> {
+    try {
+      const existingWorkouts = await this.getWorkouts();
+      const newWorkouts = existingWorkouts.filter(w => w.id !== id);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newWorkouts));
+    } catch (e) {
+      console.error('Failed to delete workout', e);
+    }
+  },
+
   async clearWorkouts(): Promise<void> {
     try {
       await AsyncStorage.removeItem(STORAGE_KEY);
