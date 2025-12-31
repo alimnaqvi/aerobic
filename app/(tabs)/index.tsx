@@ -31,13 +31,13 @@ export default function HistoryScreen() {
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <TouchableOpacity onPress={() => setPrVisible(true)} style={{ marginLeft: 10 }}>
+        <TouchableOpacity onPress={() => setPrVisible(true)} style={{ marginLeft: 15, padding: 4 }}>
           <IconSymbol name="trophy.fill" size={24} color="#ff9500" />
         </TouchableOpacity>
       ),
       headerRight: () => (
-        <TouchableOpacity onPress={() => setCalendarVisible(true)} style={{ marginRight: 10 }}>
-          <IconSymbol name="calendar" size={28} color="#0a7ea4" />
+        <TouchableOpacity onPress={() => setCalendarVisible(true)} style={{ marginRight: 15, padding: 4 }}>
+          <IconSymbol name="calendar" size={24} color="#0a7ea4" />
         </TouchableOpacity>
       ),
     });
