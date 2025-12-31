@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { StorageService } from '@/services/storage';
 import { useEffect, useState } from 'react';
-import { Alert, Button, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Button, Keyboard, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function SettingsScreen() {
   const [bodyWeight, setBodyWeight] = useState('');
@@ -51,29 +51,31 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Settings</ThemedText>
-      
-      <View style={styles.section}>
-        <ThemedText type="subtitle">Body Weight (kg)</ThemedText>
-        <View style={styles.row}>
-          <TextInput
-            style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
-            value={bodyWeight}
-            onChangeText={setBodyWeight}
-            keyboardType="numeric"
-            placeholder="70.0"
-            placeholderTextColor="#999"
-          />
-          <Button title="Save" onPress={handleSaveWeight} />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ThemedView style={styles.container}>
+        <ThemedText type="title" style={styles.title}>Settings</ThemedText>
+        
+        <View style={styles.section}>
+          <ThemedText type="subtitle">Body Weight (kg)</ThemedText>
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
+              value={bodyWeight}
+              onChangeText={setBodyWeight}
+              keyboardType="numeric"
+              placeholder="70.0"
+              placeholderTextColor="#999"
+            />
+            <Button title="Save" onPress={handleSaveWeight} />
+          </View>
+          <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
         </View>
-        <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
-      </View>
 
-      <View style={styles.divider} />
+        <View style={styles.divider} />
 
-      <Button title="Clear All Data" onPress={handleClearData} color="red" />
-    </ThemedView>
+        <Button title="Clear All Data" onPress={handleClearData} color="red" />
+      </ThemedView>
+    </TouchableWithoutFeedback>
   );
 }
 
