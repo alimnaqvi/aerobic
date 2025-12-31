@@ -32,6 +32,9 @@ const MAPPING = {
   'plus.circle.fill': 'add-circle',
   'gear': 'settings',
   'calendar': 'calendar-today',
+  'trophy.fill': 'emoji-events',
+  'xmark.circle.fill': 'cancel',
+  'scalemass.fill': 'fitness-center',
 } as IconMapping;
 
 /**

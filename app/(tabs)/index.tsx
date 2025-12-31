@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { PersonalRecordsModal } from '@/components/workouts/PersonalRecordsModal';
 import { WorkoutCalendar } from '@/components/workouts/WorkoutCalendar';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { StorageService } from '@/services/storage';
@@ -16,6 +17,7 @@ export default function HistoryScreen() {
   const [allWorkouts, setAllWorkouts] = useState<WorkoutLog[]>([]);
   const [menuVisible, setMenuVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
+  const [prVisible, setPrVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
 
@@ -28,6 +30,11 @@ export default function HistoryScreen() {
 
   useEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => setPrVisible(true)} style={{ marginLeft: 10 }}>
+          <IconSymbol name="trophy.fill" size={24} color="#ff9500" />
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <TouchableOpacity onPress={() => setCalendarVisible(true)} style={{ marginRight: 10 }}>
           <IconSymbol name="calendar" size={28} color="#0a7ea4" />
@@ -118,6 +125,12 @@ export default function HistoryScreen() {
             <ThemedText style={styles.metricText}>{item.watts}W</ThemedText>
           </View>
         ) : null}
+        {item.watts && item.bodyWeightKg ? (
+          <View style={[styles.metric, { backgroundColor: metricBg }]}>
+            <IconSymbol name="scalemass.fill" size={14} color={iconColor} />
+            <ThemedText style={styles.metricText}>{(item.watts / item.bodyWeightKg).toFixed(2)}W/kg</ThemedText>
+          </View>
+        ) : null}
         {item.durationMinutes ? (
           <View style={[styles.metric, { backgroundColor: metricBg }]}>
             <IconSymbol name="clock" size={14} color={iconColor} />
@@ -195,6 +208,12 @@ export default function HistoryScreen() {
       <WorkoutCalendar
         visible={calendarVisible}
         onClose={() => setCalendarVisible(false)}
+        workouts={allWorkouts}
+      />
+
+      <PersonalRecordsModal
+        visible={prVisible}
+        onClose={() => setPrVisible(false)}
         workouts={allWorkouts}
       />
     </View>
