@@ -1,7 +1,9 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { CsvService } from '@/services/csv';
 import { StorageService } from '@/services/storage';
+import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Button, Keyboard, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 
@@ -30,6 +32,32 @@ export default function SettingsScreen() {
     }
     await StorageService.saveSettings({ bodyWeightKg: weight });
     Alert.alert('Success', 'Body weight saved!');
+  };
+
+  const handleExport = async () => {
+    try {
+      await CsvService.exportWorkouts();
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'Failed to export workouts.');
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['text/csv', 'text/comma-separated-values', 'application/csv'],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled) return;
+
+      const count = await CsvService.importWorkouts(result.assets[0].uri);
+      Alert.alert('Success', `Imported ${count} workouts.`);
+    } catch (e) {
+      console.error(e);
+      Alert.alert('Error', 'Failed to import workouts. Please check the CSV format.');
+    }
   };
 
   const handleClearData = async () => {
@@ -73,6 +101,16 @@ export default function SettingsScreen() {
 
         <View style={styles.divider} />
 
+        <View style={styles.section}>
+          <ThemedText type="subtitle">Data Management</ThemedText>
+          <View style={styles.buttonContainer}>
+            <Button title="Export CSV" onPress={handleExport} />
+            <Button title="Import CSV" onPress={handleImport} />
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
         <Button title="Clear All Data" onPress={handleClearData} color="red" />
       </ThemedView>
     </TouchableWithoutFeedback>
@@ -96,6 +134,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     alignItems: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
   },
   input: {
     flex: 1,

@@ -75,5 +75,23 @@ export const StorageService = {
     } catch (e) {
       console.error('Failed to clear workouts', e);
     }
+  },
+
+  async importWorkouts(workouts: WorkoutLog[]): Promise<void> {
+    try {
+      const existingWorkouts = await this.getWorkouts();
+      // Merge strategies: 
+      // 1. Append all (simple)
+      // 2. Deduplicate by ID (better)
+      
+      const existingIds = new Set(existingWorkouts.map(w => w.id));
+      const newWorkouts = workouts.filter(w => !existingIds.has(w.id));
+      
+      const mergedWorkouts = [...existingWorkouts, ...newWorkouts];
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(mergedWorkouts));
+    } catch (e) {
+      console.error('Failed to import workouts', e);
+      throw e;
+    }
   }
 };
