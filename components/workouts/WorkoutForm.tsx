@@ -1,9 +1,10 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { StorageService } from '@/services/storage';
 import { WorkoutLog, WorkoutType, Zone } from '@/types/workout';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { Button, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface WorkoutFormProps {
@@ -26,6 +27,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
   const [heartRate, setHeartRate] = useState(initialValues?.heartRate?.toString() || '');
   const [calories, setCalories] = useState(initialValues?.calories?.toString() || '');
   const [elevation, setElevation] = useState(initialValues?.elevation?.toString() || '');
+  const [bodyWeight, setBodyWeight] = useState(initialValues?.bodyWeightKg?.toString() || '');
   const [notes, setNotes] = useState(initialValues?.notes || '');
   const [date, setDate] = useState(initialValues?.date ? new Date(initialValues.date) : new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -39,6 +41,49 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
   const segmentTextColor = useThemeColor({ light: '#666', dark: '#aaa' }, 'text');
   const segmentTextActiveColor = useThemeColor({ light: '#000', dark: '#fff' }, 'text');
 
+  // Load default body weight from settings if not editing
+  useEffect(() => {
+    if (!initialValues) {
+      const loadSettings = async () => {
+        const settings = await StorageService.getSettings();
+        if (settings.bodyWeightKg) {
+          setBodyWeight(settings.bodyWeightKg.toString());
+        }
+      };
+      loadSettings();
+    }
+  }, [initialValues]);
+
+  // Dynamic defaults based on last workout of same Type & Zone
+  useEffect(() => {
+    if (!initialValues) {
+      const loadLastWorkout = async () => {
+        const workouts = await StorageService.getWorkouts();
+        // Find last workout with same Type and Zone
+        const lastWorkout = workouts.find(w => w.type === type && w.zone === zone);
+        
+        if (lastWorkout) {
+          setDuration(lastWorkout.durationMinutes?.toString() || '');
+          setWatts(lastWorkout.watts?.toString() || '');
+          setDistance(lastWorkout.distanceKm?.toString() || '');
+          setHeartRate(lastWorkout.heartRate?.toString() || '');
+          setCalories(lastWorkout.calories?.toString() || '');
+          setElevation(lastWorkout.elevation?.toString() || '');
+          // Note: We don't overwrite bodyWeight here, as it should come from settings or be current
+        } else {
+          // Reset if no previous workout found (optional, but cleaner)
+          setDuration('');
+          setWatts('');
+          setDistance('');
+          setHeartRate('');
+          setCalories('');
+          setElevation('');
+        }
+      };
+      loadLastWorkout();
+    }
+  }, [type, zone, initialValues]);
+
   const handleSubmit = () => {
     const workout: WorkoutLog = {
       id: initialValues?.id || Date.now().toString(),
@@ -51,6 +96,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
       heartRate: heartRate ? parseInt(heartRate) : undefined,
       calories: calories ? parseInt(calories) : undefined,
       elevation: elevation ? parseInt(elevation) : undefined,
+      bodyWeightKg: bodyWeight ? parseFloat(bodyWeight) : undefined,
       notes: notes || undefined,
     };
     onSubmit(workout);
@@ -214,6 +260,18 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               onChangeText={setElevation}
               keyboardType="numeric"
               placeholder="0"
+              placeholderTextColor={placeholderColor}
+            />
+          </View>
+
+          <View style={styles.inputRow}>
+            <ThemedText type="subtitle" style={styles.label}>Body Weight (kg)</ThemedText>
+            <TextInput
+              style={inputStyle}
+              value={bodyWeight}
+              onChangeText={setBodyWeight}
+              keyboardType="numeric"
+              placeholder="70.0"
               placeholderTextColor={placeholderColor}
             />
           </View>

@@ -2,8 +2,33 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WorkoutLog } from '../types/workout';
 
 const STORAGE_KEY = '@aerobic_workouts';
+const SETTINGS_KEY = '@aerobic_settings';
+
+export interface UserSettings {
+  bodyWeightKg?: number;
+}
 
 export const StorageService = {
+  async getSettings(): Promise<UserSettings> {
+    try {
+      const jsonValue = await AsyncStorage.getItem(SETTINGS_KEY);
+      return jsonValue != null ? JSON.parse(jsonValue) : {};
+    } catch (e) {
+      console.error('Failed to fetch settings', e);
+      return {};
+    }
+  },
+
+  async saveSettings(settings: UserSettings): Promise<void> {
+    try {
+      const current = await this.getSettings();
+      const newSettings = { ...current, ...settings };
+      await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
+    } catch (e) {
+      console.error('Failed to save settings', e);
+    }
+  },
+
   async getWorkouts(): Promise<WorkoutLog[]> {
     try {
       const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);

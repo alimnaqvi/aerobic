@@ -15,4 +15,5 @@ export interface WorkoutLog {
   notes?: string;
   tempo?: string; // e.g., "7'35""
   speed?: number; // km/h
+  bodyWeightKg?: number;
 }
