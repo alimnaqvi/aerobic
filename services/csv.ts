@@ -74,7 +74,7 @@ export const CsvService = {
               
               for (const row of results.data as any[]) {
                 // Basic validation
-                if (!row.date || !row.type || !row.zone || !row.duration_min) {
+                if (!row.date || !row.type) {
                   continue;
                 }
 
