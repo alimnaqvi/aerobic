@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#fff',
     textAlign: 'right',
-    maxWidth: 100,
+    maxWidth: 80,
   },
   notesLabel: {
     marginTop: 10,

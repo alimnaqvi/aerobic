@@ -1,19 +1,30 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/ThemedButton';
+import { ThemedListItem } from '@/components/ui/ThemedListItem';
+import { ThemedModal } from '@/components/ui/ThemedModal';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useToast } from '@/context/ToastContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { CsvService } from '@/services/csv';
 import { StorageService } from '@/services/storage';
 import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
-import { Alert, Keyboard, Platform, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, Keyboard, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function SettingsScreen() {
   const [bodyWeight, setBodyWeight] = useState('');
+  const [tempWeight, setTempWeight] = useState('');
+  const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
+  
   const inputBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
   const inputBorder = useThemeColor({ light: '#ccc', dark: '#444' }, 'icon');
   const textColor = useThemeColor({}, 'text');
+  const modalBg = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
+  const headerBg = useThemeColor({ light: '#f8f9fa', dark: '#000000' }, 'background');
+  const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
+  const iconColor = useThemeColor({}, 'icon');
+  
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -27,13 +38,20 @@ export default function SettingsScreen() {
     }
   };
 
+  const openWeightModal = () => {
+    setTempWeight(bodyWeight);
+    setIsWeightModalVisible(true);
+  };
+
   const handleSaveWeight = async () => {
-    const weight = parseFloat(bodyWeight);
+    const weight = parseFloat(tempWeight);
     if (isNaN(weight) || weight <= 0) {
       showToast('Please enter a valid body weight.', 'error');
       return;
     }
     await StorageService.saveSettings({ bodyWeightKg: weight });
+    setBodyWeight(weight.toString());
+    setIsWeightModalVisible(false);
     showToast('Body weight saved!', 'success');
   };
 
@@ -93,37 +111,69 @@ export default function SettingsScreen() {
 
   const content = (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Settings</ThemedText>
-      
-      <View style={styles.section}>
-        <ThemedText type="subtitle">Body Weight (kg)</ThemedText>
-        <View style={styles.row}>
-          <TextInput
-            style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
-            value={bodyWeight}
-            onChangeText={setBodyWeight}
-            keyboardType="numeric"
-            placeholder="70.0"
-            placeholderTextColor="#999"
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.section}>
+          <ThemedText type="subtitle" style={styles.sectionHeader}>Profile</ThemedText>
+          <ThemedListItem 
+            title="Set Body Weight" 
+            value={bodyWeight ? `${bodyWeight} kg` : 'Not set'}
+            onPress={openWeightModal}
+            isFirst
+            isLast
           />
-          <ThemedButton title="Save" onPress={handleSaveWeight} size="small" />
+          <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
         </View>
-        <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
-      </View>
 
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <ThemedText type="subtitle">Data Management</ThemedText>
-        <View style={styles.buttonContainer}>
-          <ThemedButton title="Export CSV" onPress={handleExport} variant="secondary" />
-          <ThemedButton title="Import CSV" onPress={handleImport} variant="secondary" />
+        <View style={styles.section}>
+          <ThemedText type="subtitle" style={styles.sectionHeader}>Data Management</ThemedText>
+          <ThemedListItem 
+            title="Export CSV" 
+            onPress={handleExport} 
+            isFirst
+          />
+          <ThemedListItem 
+            title="Import CSV" 
+            onPress={handleImport} 
+          />
+          <ThemedListItem 
+            title="Clear All Data" 
+            onPress={handleClearData} 
+            variant="destructive" 
+            showChevron={false}
+            isLast
+          />
         </View>
-      </View>
+      </ScrollView>
 
-      <View style={styles.divider} />
+      <ThemedModal
+        visible={isWeightModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onClose={() => setIsWeightModalVisible(false)}
+      >
+        <ThemedView style={[styles.modalContainer, { backgroundColor: modalBg }]}>
+          <View style={[styles.modalHeader, { backgroundColor: headerBg, borderBottomColor: borderColor }]}>
+            <ThemedText type="title">Body Weight</ThemedText>
+            <TouchableOpacity onPress={() => setIsWeightModalVisible(false)} style={styles.closeButton}>
+              <IconSymbol name="xmark.circle.fill" size={30} color={iconColor} />
+            </TouchableOpacity>
+          </View>
 
-      <ThemedButton title="Clear All Data" onPress={handleClearData} variant="danger" />
+          <View style={styles.modalContent}>
+            <ThemedText style={styles.modalLabel}>Enter your body weight in kg:</ThemedText>
+            <TextInput
+              style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
+              value={tempWeight}
+              onChangeText={setTempWeight}
+              keyboardType="numeric"
+              placeholder="70.0"
+              placeholderTextColor="#999"
+              autoFocus
+            />
+            <ThemedButton title="Save" onPress={handleSaveWeight} size="large" style={{ marginTop: 20 }} />
+          </View>
+        </ThemedView>
+      </ThemedModal>
     </ThemedView>
   );
 
@@ -141,40 +191,51 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
     padding: 20,
   },
-  title: {
-    textAlign: 'center',
+  section: {
     marginBottom: 30,
   },
-  section: {
-    gap: 10,
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'center',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 10,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 8,
-    fontSize: 16,
+  sectionHeader: {
+    marginBottom: 10,
+    marginLeft: 10,
+    fontSize: 14,
+    textTransform: 'uppercase',
+    opacity: 0.6,
   },
   hint: {
     fontSize: 12,
     color: '#666',
+    marginTop: 8,
+    marginLeft: 16,
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#ccc',
-    marginVertical: 20,
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalContent: {
+    padding: 20,
+  },
+  modalLabel: {
+    marginBottom: 10,
+    fontSize: 16,
+  },
+  input: {
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 18,
+    marginBottom: 10,
   },
 });
