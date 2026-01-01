@@ -118,7 +118,7 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
               key={zone}
               style={[
                 styles.filterButton,
-                selectedZone === zone && { backgroundColor: activeTabBg, borderColor: borderColor, borderWidth: 1 }
+                selectedZone === zone && { backgroundColor: activeTabBg, borderColor: borderColor }
               ]}
               onPress={() => setSelectedZone(zone)}
             >
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingVertical: 6,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: 'transparent',
   },
   filterText: {

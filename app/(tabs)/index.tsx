@@ -210,7 +210,7 @@ export default function HistoryScreen() {
             key={zone}
             style={[
               styles.filterButton,
-              filterZone === zone && { backgroundColor: activeTabBg, borderColor: borderColor, borderWidth: 1 }
+              filterZone === zone && { backgroundColor: activeTabBg, borderColor: borderColor }
             ]}
             onPress={() => setFilterZone(zone)}
           >
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    shadowColor: '',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingVertical: 6,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: 'transparent',
   },
   filterText: {
