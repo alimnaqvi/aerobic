@@ -20,7 +20,7 @@ export default function LogScreen() {
           title="Save" 
           onPress={() => formRef.current?.submit()} 
           variant="ghost"
-          style={{ marginRight: -8 }}
+          // style={{ marginRight: -8 }}
         />
       ),
     });

@@ -34,15 +34,16 @@ export default function HistoryScreen() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity onPress={() => setPrVisible(true)} style={{ marginLeft: 15, padding: 4 }}>
-          <IconSymbol name="trophy.fill" size={24} color="#ff9500" />
-        </TouchableOpacity>
-      ),
+      // headerLeft: () => null,
       headerRight: () => (
-        <TouchableOpacity onPress={() => setCalendarVisible(true)} style={{ marginRight: 15, padding: 4 }}>
-          <IconSymbol name="calendar" size={24} color="#0a7ea4" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', marginRight: 15, gap: 10 }}>
+          <TouchableOpacity onPress={() => setPrVisible(true)} style={{ padding: 4 }}>
+            <IconSymbol name="trophy.fill" size={24} color="#ff9500" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setCalendarVisible(true)} style={{ padding: 4 }}>
+            <IconSymbol name="calendar" size={24} color="#0a7ea4" />
+          </TouchableOpacity>
+        </View>
       ),
     });
   }, [navigation]);

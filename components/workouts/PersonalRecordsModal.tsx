@@ -1,10 +1,11 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { ThemedModal } from '@/components/ui/ThemedModal';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { WorkoutLog, Zone } from '@/types/workout';
 import React, { useMemo, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface PersonalRecordsModalProps {
   visible: boolean;
@@ -98,11 +99,11 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
   };
 
   return (
-    <Modal
+    <ThemedModal
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onClose={onClose}
     >
       <ThemedView style={[styles.container, { backgroundColor }]}>
         <View style={[styles.header, { backgroundColor: headerBg, borderBottomColor: borderColor }]}>
@@ -159,7 +160,7 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
           )}
         </ScrollView>
       </ThemedView>
-    </Modal>
+    </ThemedModal>
   );
 }
 
