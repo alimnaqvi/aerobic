@@ -4,7 +4,7 @@ import { StorageService } from '@/services/storage';
 import { WorkoutLog } from '@/types/workout';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Alert, Button } from 'react-native';
+import { Alert, Button, Platform } from 'react-native';
 
 export default function LogScreen() {
   const router = useRouter();
@@ -15,16 +15,17 @@ export default function LogScreen() {
     navigation.setOptions({
       headerRight: () => (
         <Button title="Save" onPress={() => formRef.current?.submit()} />
-        // <TouchableOpacity onPress={() => formRef.current?.submit()} style={{ marginRight: 15, padding: 4 }}>
-        //   <IconSymbol name="checkmark" size={24} color="#0a7ea4" />
-        // </TouchableOpacity>
       ),
     });
   }, [navigation]);
 
   const handleSave = async (workout: WorkoutLog) => {
     await StorageService.addWorkout(workout);
-    Alert.alert('Success', 'Workout saved!');
+    if (Platform.OS === 'web') {
+      window.alert('Success: Workout saved!');
+    } else {
+      Alert.alert('Success', 'Workout saved!');
+    }
     router.push('/');
   };
 

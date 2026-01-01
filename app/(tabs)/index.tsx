@@ -8,7 +8,7 @@ import { StorageService } from '@/services/storage';
 import { WorkoutLog, Zone } from '@/types/workout';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, GestureResponderEvent, Modal, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, GestureResponderEvent, Modal, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type FilterZone = 'All' | Zone;
 
@@ -68,21 +68,28 @@ export default function HistoryScreen() {
 
   const handleDelete = async (id: string) => {
     closeMenu();
-    Alert.alert(
-      'Delete Workout',
-      'Are you sure you want to delete this workout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive', 
-          onPress: async () => {
-            await StorageService.deleteWorkout(id);
-            loadWorkouts();
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to delete this workout?')) {
+        await StorageService.deleteWorkout(id);
+        loadWorkouts();
+      }
+    } else {
+      Alert.alert(
+        'Delete Workout',
+        'Are you sure you want to delete this workout?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Delete', 
+            style: 'destructive', 
+            onPress: async () => {
+              await StorageService.deleteWorkout(id);
+              loadWorkouts();
+            }
           }
-        }
-      ]
-    );
+        ]
+      );
+    }
   };
 
   const handleEdit = (id: string) => {

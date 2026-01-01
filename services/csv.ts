@@ -2,6 +2,7 @@ import { WorkoutLog, WorkoutType, Zone } from '@/types/workout';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import Papa from 'papaparse';
+import { Platform } from 'react-native';
 import { StorageService } from './storage';
 
 const CSV_HEADER = [
@@ -44,6 +45,19 @@ export const CsvService = {
         data: data
       });
 
+      if (Platform.OS === 'web') {
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `aerobic_workouts_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
       const fileName = `aerobic_workouts_${new Date().toISOString().split('T')[0]}.csv`;
       const file = new File(Paths.cache, fileName);
       
@@ -61,8 +75,15 @@ export const CsvService = {
 
   async importWorkouts(fileUri: string): Promise<number> {
     try {
-      const file = new File(fileUri);
-      const fileContent = await file.text();
+      let fileContent: string;
+
+      if (Platform.OS === 'web') {
+        const response = await fetch(fileUri);
+        fileContent = await response.text();
+      } else {
+        const file = new File(fileUri);
+        fileContent = await file.text();
+      }
       
       return new Promise((resolve, reject) => {
         Papa.parse(fileContent, {

@@ -3,7 +3,7 @@ import { StorageService } from '@/services/storage';
 import { WorkoutLog } from '@/types/workout';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button } from 'react-native';
+import { Alert, Button, Platform } from 'react-native';
 
 export default function EditWorkoutScreen() {
   const router = useRouter();
@@ -18,9 +18,6 @@ export default function EditWorkoutScreen() {
       headerBackTitle: 'History',
       headerRight: () => (
         <Button title="Save" onPress={() => formRef.current?.submit()} />
-        // <TouchableOpacity onPress={() => formRef.current?.submit()} style={{ marginRight: 15, padding: 4 }}>
-        //   <IconSymbol name="checkmark" size={24} color="#0a7ea4" />
-        // </TouchableOpacity>
       ),
     });
   }, [navigation]);
@@ -33,7 +30,11 @@ export default function EditWorkoutScreen() {
       if (found) {
         setWorkout(found);
       } else {
-        Alert.alert('Error', 'Workout not found');
+        if (Platform.OS === 'web') {
+          window.alert('Error: Workout not found');
+        } else {
+          Alert.alert('Error', 'Workout not found');
+        }
         router.back();
       }
     };
@@ -42,7 +43,11 @@ export default function EditWorkoutScreen() {
 
   const handleSave = async (updatedWorkout: WorkoutLog) => {
     await StorageService.updateWorkout(updatedWorkout);
-    Alert.alert('Success', 'Workout updated!');
+    if (Platform.OS === 'web') {
+      window.alert('Success: Workout updated!');
+    } else {
+      Alert.alert('Success', 'Workout updated!');
+    }
     router.back();
   };
 

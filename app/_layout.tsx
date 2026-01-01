@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Platform, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -12,7 +13,7 @@ export const unstable_settings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  return (
+  const content = (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -21,4 +22,36 @@ export default function RootLayout() {
       <StatusBar style="auto" />
     </ThemeProvider>
   );
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.webContainer}>
+        <View style={styles.webContent}>
+          {content}
+        </View>
+      </View>
+    );
+  }
+
+  return content;
 }
+
+const styles = StyleSheet.create({
+  webContainer: {
+    flex: 1,
+    backgroundColor: 'transparent', // Background for the outer area
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  webContent: {
+    width: '100%',
+    maxWidth: 600,
+    height: '100%',
+    maxHeight: 900, // Optional: limit height on very large screens
+    backgroundColor: '#fff', // Ensure the app background is set
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+  },
+});

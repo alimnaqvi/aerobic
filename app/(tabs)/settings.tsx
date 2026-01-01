@@ -5,7 +5,7 @@ import { CsvService } from '@/services/csv';
 import { StorageService } from '@/services/storage';
 import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
-import { Alert, Button, Keyboard, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, Button, Keyboard, Platform, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function SettingsScreen() {
   const [bodyWeight, setBodyWeight] = useState('');
@@ -27,11 +27,19 @@ export default function SettingsScreen() {
   const handleSaveWeight = async () => {
     const weight = parseFloat(bodyWeight);
     if (isNaN(weight) || weight <= 0) {
-      Alert.alert('Invalid Input', 'Please enter a valid body weight.');
+      if (Platform.OS === 'web') {
+        window.alert('Invalid Input: Please enter a valid body weight.');
+      } else {
+        Alert.alert('Invalid Input', 'Please enter a valid body weight.');
+      }
       return;
     }
     await StorageService.saveSettings({ bodyWeightKg: weight });
-    Alert.alert('Success', 'Body weight saved!');
+    if (Platform.OS === 'web') {
+      window.alert('Success: Body weight saved!');
+    } else {
+      Alert.alert('Success', 'Body weight saved!');
+    }
   };
 
   const handleExport = async () => {
@@ -39,7 +47,11 @@ export default function SettingsScreen() {
       await CsvService.exportWorkouts();
     } catch (e) {
       console.error(e);
-      Alert.alert('Error', 'Failed to export workouts.');
+      if (Platform.OS === 'web') {
+        window.alert('Error: Failed to export workouts.');
+      } else {
+        Alert.alert('Error', 'Failed to export workouts.');
+      }
     }
   };
 
@@ -53,66 +65,89 @@ export default function SettingsScreen() {
       if (result.canceled) return;
 
       const count = await CsvService.importWorkouts(result.assets[0].uri);
-      Alert.alert('Success', `Imported ${count} workouts.`);
+      if (Platform.OS === 'web') {
+        window.alert(`Success: Imported ${count} workouts.`);
+      } else {
+        Alert.alert('Success', `Imported ${count} workouts.`);
+      }
     } catch (e) {
       console.error(e);
-      Alert.alert('Error', 'Failed to import workouts. Please check the CSV format.');
+      if (Platform.OS === 'web') {
+        window.alert('Error: Failed to import workouts. Please check the CSV format.');
+      } else {
+        Alert.alert('Error', 'Failed to import workouts. Please check the CSV format.');
+      }
     }
   };
 
   const handleClearData = async () => {
-    Alert.alert(
-      'Clear All Data',
-      'Are you sure you want to delete all workouts? This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive', 
-          onPress: async () => {
-            await StorageService.clearWorkouts();
-            Alert.alert('Data cleared!');
+    if (Platform.OS === 'web') {
+      if (window.confirm('Clear All Data: Are you sure you want to delete all workouts? This cannot be undone.')) {
+        await StorageService.clearWorkouts();
+        window.alert('Data cleared!');
+      }
+    } else {
+      Alert.alert(
+        'Clear All Data',
+        'Are you sure you want to delete all workouts? This cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Delete', 
+            style: 'destructive', 
+            onPress: async () => {
+              await StorageService.clearWorkouts();
+              Alert.alert('Data cleared!');
+            }
           }
-        }
-      ]
-    );
+        ]
+      );
+    }
   };
+
+  const content = (
+    <ThemedView style={styles.container}>
+      <ThemedText type="title" style={styles.title}>Settings</ThemedText>
+      
+      <View style={styles.section}>
+        <ThemedText type="subtitle">Body Weight (kg)</ThemedText>
+        <View style={styles.row}>
+          <TextInput
+            style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
+            value={bodyWeight}
+            onChangeText={setBodyWeight}
+            keyboardType="numeric"
+            placeholder="70.0"
+            placeholderTextColor="#999"
+          />
+          <Button title="Save" onPress={handleSaveWeight} />
+        </View>
+        <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
+      </View>
+
+      <View style={styles.divider} />
+
+      <View style={styles.section}>
+        <ThemedText type="subtitle">Data Management</ThemedText>
+        <View style={styles.buttonContainer}>
+          <Button title="Export CSV" onPress={handleExport} />
+          <Button title="Import CSV" onPress={handleImport} />
+        </View>
+      </View>
+
+      <View style={styles.divider} />
+
+      <Button title="Clear All Data" onPress={handleClearData} color="red" />
+    </ThemedView>
+  );
+
+  if (Platform.OS === 'web') {
+    return content;
+  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>Settings</ThemedText>
-        
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Body Weight (kg)</ThemedText>
-          <View style={styles.row}>
-            <TextInput
-              style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
-              value={bodyWeight}
-              onChangeText={setBodyWeight}
-              keyboardType="numeric"
-              placeholder="70.0"
-              placeholderTextColor="#999"
-            />
-            <Button title="Save" onPress={handleSaveWeight} />
-          </View>
-          <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.section}>
-          <ThemedText type="subtitle">Data Management</ThemedText>
-          <View style={styles.buttonContainer}>
-            <Button title="Export CSV" onPress={handleExport} />
-            <Button title="Import CSV" onPress={handleImport} />
-          </View>
-        </View>
-
-        <View style={styles.divider} />
-
-        <Button title="Clear All Data" onPress={handleClearData} color="red" />
-      </ThemedView>
+      {content}
     </TouchableWithoutFeedback>
   );
 }
