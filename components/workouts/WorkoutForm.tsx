@@ -1,11 +1,12 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ThemedButton } from '@/components/ui/ThemedButton';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog, WorkoutType, Zone } from '@/types/workout';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { Button, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface WorkoutFormProps {
   initialValues?: WorkoutLog;
@@ -286,7 +287,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
             placeholderTextColor={placeholderColor}
           />
 
-          <Button title={submitLabel} onPress={handleSubmit} />
+          <ThemedButton title={submitLabel} onPress={handleSubmit} size="large" style={{ marginTop: 20 }} />
         </ThemedView>
       </ScrollView>
     </KeyboardAvoidingView>

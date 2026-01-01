@@ -1,9 +1,10 @@
+import { ThemedButton } from '@/components/ui/ThemedButton';
 import { WorkoutForm, WorkoutFormRef } from '@/components/workouts/WorkoutForm';
+import { useToast } from '@/context/ToastContext';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog } from '@/types/workout';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Platform } from 'react-native';
 
 export default function EditWorkoutScreen() {
   const router = useRouter();
@@ -11,13 +12,19 @@ export default function EditWorkoutScreen() {
   const { id } = useLocalSearchParams();
   const [workout, setWorkout] = useState<WorkoutLog | null>(null);
   const formRef = useRef<WorkoutFormRef>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     navigation.setOptions({
       title: 'Edit Workout',
       headerBackTitle: 'History',
       headerRight: () => (
-        <Button title="Save" onPress={() => formRef.current?.submit()} />
+        <ThemedButton 
+          title="Save" 
+          onPress={() => formRef.current?.submit()} 
+          variant="ghost"
+          style={{ marginRight: -8 }}
+        />
       ),
     });
   }, [navigation]);
@@ -30,11 +37,7 @@ export default function EditWorkoutScreen() {
       if (found) {
         setWorkout(found);
       } else {
-        if (Platform.OS === 'web') {
-          window.alert('Error: Workout not found');
-        } else {
-          Alert.alert('Error', 'Workout not found');
-        }
+        showToast('Workout not found', 'error');
         router.back();
       }
     };
@@ -43,11 +46,7 @@ export default function EditWorkoutScreen() {
 
   const handleSave = async (updatedWorkout: WorkoutLog) => {
     await StorageService.updateWorkout(updatedWorkout);
-    if (Platform.OS === 'web') {
-      window.alert('Success: Workout updated!');
-    } else {
-      Alert.alert('Success', 'Workout updated!');
-    }
+    showToast('Workout updated!', 'success');
     router.back();
   };
 

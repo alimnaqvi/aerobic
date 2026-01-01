@@ -1,31 +1,34 @@
 // import { ThemedText } from '@/components/themed-text';
+import { ThemedButton } from '@/components/ui/ThemedButton';
 import { WorkoutForm, WorkoutFormRef } from '@/components/workouts/WorkoutForm';
+import { useToast } from '@/context/ToastContext';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog } from '@/types/workout';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Alert, Button, Platform } from 'react-native';
 
 export default function LogScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const formRef = useRef<WorkoutFormRef>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Button title="Save" onPress={() => formRef.current?.submit()} />
+        <ThemedButton 
+          title="Save" 
+          onPress={() => formRef.current?.submit()} 
+          variant="ghost"
+          style={{ marginRight: -8 }}
+        />
       ),
     });
   }, [navigation]);
 
   const handleSave = async (workout: WorkoutLog) => {
     await StorageService.addWorkout(workout);
-    if (Platform.OS === 'web') {
-      window.alert('Success: Workout saved!');
-    } else {
-      Alert.alert('Success', 'Workout saved!');
-    }
+    showToast('Workout saved!', 'success');
     router.push('/');
   };
 

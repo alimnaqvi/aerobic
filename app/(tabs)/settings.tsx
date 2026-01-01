@@ -1,17 +1,20 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ThemedButton } from '@/components/ui/ThemedButton';
+import { useToast } from '@/context/ToastContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { CsvService } from '@/services/csv';
 import { StorageService } from '@/services/storage';
 import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
-import { Alert, Button, Keyboard, Platform, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, Keyboard, Platform, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function SettingsScreen() {
   const [bodyWeight, setBodyWeight] = useState('');
   const inputBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
   const inputBorder = useThemeColor({ light: '#ccc', dark: '#444' }, 'icon');
   const textColor = useThemeColor({}, 'text');
+  const { showToast } = useToast();
 
   useEffect(() => {
     loadSettings();
@@ -27,31 +30,22 @@ export default function SettingsScreen() {
   const handleSaveWeight = async () => {
     const weight = parseFloat(bodyWeight);
     if (isNaN(weight) || weight <= 0) {
-      if (Platform.OS === 'web') {
-        window.alert('Invalid Input: Please enter a valid body weight.');
-      } else {
-        Alert.alert('Invalid Input', 'Please enter a valid body weight.');
-      }
+      showToast('Please enter a valid body weight.', 'error');
       return;
     }
     await StorageService.saveSettings({ bodyWeightKg: weight });
-    if (Platform.OS === 'web') {
-      window.alert('Success: Body weight saved!');
-    } else {
-      Alert.alert('Success', 'Body weight saved!');
-    }
+    showToast('Body weight saved!', 'success');
   };
 
   const handleExport = async () => {
     try {
       await CsvService.exportWorkouts();
+      if (Platform.OS === 'web') {
+        showToast('Export started', 'info');
+      }
     } catch (e) {
       console.error(e);
-      if (Platform.OS === 'web') {
-        window.alert('Error: Failed to export workouts.');
-      } else {
-        Alert.alert('Error', 'Failed to export workouts.');
-      }
+      showToast('Failed to export workouts.', 'error');
     }
   };
 
@@ -65,18 +59,10 @@ export default function SettingsScreen() {
       if (result.canceled) return;
 
       const count = await CsvService.importWorkouts(result.assets[0].uri);
-      if (Platform.OS === 'web') {
-        window.alert(`Success: Imported ${count} workouts.`);
-      } else {
-        Alert.alert('Success', `Imported ${count} workouts.`);
-      }
+      showToast(`Imported ${count} workouts.`, 'success');
     } catch (e) {
       console.error(e);
-      if (Platform.OS === 'web') {
-        window.alert('Error: Failed to import workouts. Please check the CSV format.');
-      } else {
-        Alert.alert('Error', 'Failed to import workouts. Please check the CSV format.');
-      }
+      showToast('Failed to import workouts. Please check the CSV format.', 'error');
     }
   };
 
@@ -84,7 +70,7 @@ export default function SettingsScreen() {
     if (Platform.OS === 'web') {
       if (window.confirm('Clear All Data: Are you sure you want to delete all workouts? This cannot be undone.')) {
         await StorageService.clearWorkouts();
-        window.alert('Data cleared!');
+        showToast('Data cleared!', 'success');
       }
     } else {
       Alert.alert(
@@ -97,7 +83,7 @@ export default function SettingsScreen() {
             style: 'destructive', 
             onPress: async () => {
               await StorageService.clearWorkouts();
-              Alert.alert('Data cleared!');
+              showToast('Data cleared!', 'success');
             }
           }
         ]
@@ -120,7 +106,7 @@ export default function SettingsScreen() {
             placeholder="70.0"
             placeholderTextColor="#999"
           />
-          <Button title="Save" onPress={handleSaveWeight} />
+          <ThemedButton title="Save" onPress={handleSaveWeight} size="small" />
         </View>
         <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
       </View>
@@ -130,14 +116,14 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <ThemedText type="subtitle">Data Management</ThemedText>
         <View style={styles.buttonContainer}>
-          <Button title="Export CSV" onPress={handleExport} />
-          <Button title="Import CSV" onPress={handleImport} />
+          <ThemedButton title="Export CSV" onPress={handleExport} variant="secondary" />
+          <ThemedButton title="Import CSV" onPress={handleImport} variant="secondary" />
         </View>
       </View>
 
       <View style={styles.divider} />
 
-      <Button title="Clear All Data" onPress={handleClearData} color="red" />
+      <ThemedButton title="Clear All Data" onPress={handleClearData} variant="danger" />
     </ThemedView>
   );
 
