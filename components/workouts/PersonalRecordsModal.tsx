@@ -2,8 +2,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { WorkoutLog } from '@/types/workout';
-import React, { useMemo } from 'react';
+import { WorkoutLog, Zone } from '@/types/workout';
+import React, { useMemo, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface PersonalRecordsModalProps {
@@ -23,10 +23,12 @@ interface PRStats {
 }
 
 export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRecordsModalProps) {
+  const [selectedZone, setSelectedZone] = useState<Zone>('Zone 2');
   const backgroundColor = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
   const headerBg = useThemeColor({ light: '#f8f9fa', dark: '#000000' }, 'background');
   const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
   const iconColor = useThemeColor({}, 'icon');
+  const activeTabBg = useThemeColor({ light: '#e0e0e0', dark: '#3a3a3c' }, 'background');
 
   const prs = useMemo(() => {
     const stats: Record<string, Record<string, PRStats>> = {};
@@ -110,14 +112,34 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
           </TouchableOpacity>
         </View>
 
+        <View style={styles.filterContainer}>
+          {(['Zone 2', 'Zone 5'] as Zone[]).map((zone) => (
+            <TouchableOpacity
+              key={zone}
+              style={[
+                styles.filterButton,
+                selectedZone === zone && { backgroundColor: activeTabBg, borderColor: borderColor, borderWidth: 1 }
+              ]}
+              onPress={() => setSelectedZone(zone)}
+            >
+              <ThemedText style={[
+                styles.filterText,
+                selectedZone === zone && { fontWeight: '600' }
+              ]}>{zone}</ThemedText>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         <ScrollView contentContainerStyle={styles.content}>
-          {Object.entries(prs).map(([type, zones]) => (
-            <View key={type} style={styles.section}>
-              <ThemedText type="subtitle" style={styles.sectionTitle}>{type}</ThemedText>
-              
-              {Object.entries(zones).map(([zone, stats]) => (
-                <View key={zone} style={styles.zoneContainer}>
-                  <ThemedText type="defaultSemiBold" style={styles.zoneTitle}>{zone}</ThemedText>
+          {Object.entries(prs).map(([type, zones]) => {
+            const stats = zones[selectedZone];
+            if (!stats) return null;
+
+            return (
+              <View key={type} style={styles.section}>
+                <ThemedText type="subtitle" style={styles.sectionTitle}>{type}</ThemedText>
+                
+                <View style={styles.zoneContainer}>
                   <View style={styles.grid}>
                     {renderPRItem('Best Power', stats.maxWatts, 'W')}
                     {renderPRItem('Best W/kg', stats.maxWattsPerKg, 'W/kg', true)}
@@ -126,9 +148,9 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
                     {renderPRItem('Longest Time', stats.maxDuration, 'min')}
                   </View>
                 </View>
-              ))}
-            </View>
-          ))}
+              </View>
+            );
+          })}
           
           {Object.keys(prs).length === 0 && (
             <View style={styles.emptyState}>
@@ -211,5 +233,20 @@ const styles = StyleSheet.create({
   emptyState: {
     padding: 20,
     alignItems: 'center',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    paddingBottom: 0,
+    gap: 10,
+  },
+  filterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+  },
+  filterText: {
+    fontSize: 14,
   },
 });

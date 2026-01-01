@@ -7,14 +7,16 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { StorageService } from '@/services/storage';
 import { WorkoutLog, Zone } from '@/types/workout';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, GestureResponderEvent, Modal, Pressable, SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, FlatList, GestureResponderEvent, Modal, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+type FilterZone = 'All' | Zone;
 
 export default function HistoryScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const [sections, setSections] = useState<{ title: Zone; data: WorkoutLog[] }[]>([]);
   const [allWorkouts, setAllWorkouts] = useState<WorkoutLog[]>([]);
+  const [filterZone, setFilterZone] = useState<FilterZone>('All');
   const [menuVisible, setMenuVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [prVisible, setPrVisible] = useState(false);
@@ -23,10 +25,12 @@ export default function HistoryScreen() {
 
   const containerBg = useThemeColor({ light: '#f8f9fa', dark: '#000000' }, 'background');
   const cardBg = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
+  const zone5Bg = useThemeColor({ light: '#fff5f5', dark: '#2a1c1c' }, 'background');
   const menuBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
   const metricBg = useThemeColor({ light: '#f5f5f5', dark: '#2C2C2E' }, 'background');
   const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
   const iconColor = useThemeColor({}, 'icon');
+  const activeTabBg = useThemeColor({ light: '#e0e0e0', dark: '#3a3a3c' }, 'background');
 
   useEffect(() => {
     navigation.setOptions({
@@ -52,17 +56,15 @@ export default function HistoryScreen() {
   const loadWorkouts = async () => {
     const workouts = await StorageService.getWorkouts();
     setAllWorkouts(workouts);
-    
-    // Group by Zone
-    const zone2 = workouts.filter(w => w.zone === 'Zone 2').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const zone5 = workouts.filter(w => w.zone === 'Zone 5').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    const newSections = [];
-    if (zone2.length > 0) newSections.push({ title: 'Zone 2' as Zone, data: zone2 });
-    if (zone5.length > 0) newSections.push({ title: 'Zone 5' as Zone, data: zone5 });
-
-    setSections(newSections);
   };
+
+  const filteredWorkouts = useMemo(() => {
+    let filtered = allWorkouts;
+    if (filterZone !== 'All') {
+      filtered = allWorkouts.filter(w => w.zone === filterZone);
+    }
+    return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [allWorkouts, filterZone]);
 
   const handleDelete = async (id: string) => {
     closeMenu();
@@ -106,103 +108,125 @@ export default function HistoryScreen() {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  const renderItem = ({ item }: { item: WorkoutLog }) => (
-    <View style={[styles.card, { backgroundColor: cardBg, borderColor }]}>
-      <View style={styles.cardHeader}>
-        <View>
-          <ThemedText type="defaultSemiBold" style={styles.dateText}>{formatDate(item.date)}</ThemedText>
-          <ThemedText style={styles.typeText}>{item.type}</ThemedText>
+  const renderItem = ({ item }: { item: WorkoutLog }) => {
+    const isZone5 = item.zone === 'Zone 5';
+    const backgroundColor = filterZone === 'All' && isZone5 ? zone5Bg : cardBg;
+
+    return (
+      <View style={[styles.card, { backgroundColor, borderColor }]}>
+        <View style={styles.cardHeader}>
+          <View>
+            <ThemedText type="defaultSemiBold" style={styles.dateText}>{formatDate(item.date)}</ThemedText>
+            <View style={styles.typeRow}>
+              <ThemedText style={styles.typeText}>{item.type}</ThemedText>
+              {filterZone === 'All' && (
+                <View style={[styles.zoneBadge, { backgroundColor: isZone5 ? '#ff3b30' : '#0a7ea4' }]}>
+                  <ThemedText style={styles.zoneText}>{item.zone}</ThemedText>
+                </View>
+              )}
+            </View>
+          </View>
+          <TouchableOpacity onPress={(e) => openMenu(e, item.id)} style={styles.menuButton}>
+            <IconSymbol name="ellipsis" size={20} color={iconColor} />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={(e) => openMenu(e, item.id)} style={styles.menuButton}>
-          <IconSymbol name="ellipsis" size={20} color={iconColor} />
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.metricsContainer}>
-        {item.watts ? (
-          <View style={[styles.metric, { backgroundColor: metricBg }]}>
-            <IconSymbol name="bolt.fill" size={14} color={iconColor} />
-            <ThemedText style={styles.metricText}>{item.watts}W</ThemedText>
-          </View>
-        ) : null}
-        {item.watts && item.bodyWeightKg ? (
-          <View style={[styles.metric, { backgroundColor: metricBg }]}>
-            <IconSymbol name="scalemass.fill" size={14} color={iconColor} />
-            <ThemedText style={styles.metricText}>{(item.watts / item.bodyWeightKg).toFixed(2)}W/kg</ThemedText>
-          </View>
-        ) : null}
-        {item.durationMinutes ? (
-          <View style={[styles.metric, { backgroundColor: metricBg }]}>
-            <IconSymbol name="clock" size={14} color={iconColor} />
-            <ThemedText style={styles.metricText}>{item.durationMinutes}m</ThemedText>
-          </View>
-        ) : null}
-        {item.distanceKm ? (
-          <View style={[styles.metric, { backgroundColor: metricBg }]}>
-            <IconSymbol name="map" size={14} color={iconColor} />
-            <ThemedText style={styles.metricText}>{item.distanceKm}km</ThemedText>
-          </View>
-        ) : null}
-        {item.heartRate ? (
-          <View style={[styles.metric, { backgroundColor: metricBg }]}>
-            <IconSymbol name="heart.fill" size={14} color="#ff3b30" />
-            <ThemedText style={styles.metricText}>{item.heartRate}bpm</ThemedText>
-          </View>
-        ) : null}
-        {item.calories ? (
-          <View style={[styles.metric, { backgroundColor: metricBg }]}>
-            <IconSymbol name="flame.fill" size={14} color="#ff9500" />
-            <ThemedText style={styles.metricText}>{item.calories}cal</ThemedText>
-          </View>
-        ) : null}
-        {item.incline ? (
-          <View style={[styles.metric, { backgroundColor: metricBg }]}>
-            <IconSymbol name="arrow.up.right" size={14} color={iconColor} />
-            <ThemedText style={styles.metricText}>{item.incline}% ({(Math.atan(item.incline / 100) * (180 / Math.PI)).toFixed(1)}°)</ThemedText>
-          </View>
-        ) : null}
-        {item.distanceKm && item.durationMinutes ? (
-          <>
+        <View style={styles.metricsContainer}>
+          {item.watts ? (
             <View style={[styles.metric, { backgroundColor: metricBg }]}>
-              <IconSymbol name="speedometer" size={14} color={iconColor} />
-              <ThemedText style={styles.metricText}>{(item.distanceKm / (item.durationMinutes / 60)).toFixed(1)}km/h</ThemedText>
+              <IconSymbol name="bolt.fill" size={14} color={iconColor} />
+              <ThemedText style={styles.metricText}>{item.watts}W</ThemedText>
             </View>
+          ) : null}
+          {item.watts && item.bodyWeightKg ? (
             <View style={[styles.metric, { backgroundColor: metricBg }]}>
-              <IconSymbol name="stopwatch" size={14} color={iconColor} />
-              <ThemedText style={styles.metricText}>
-                {(() => {
-                  const pace = item.durationMinutes / item.distanceKm;
-                  const m = Math.floor(pace);
-                  const s = Math.round((pace - m) * 60);
-                  return `${m}'${s.toString().padStart(2, '0')}"/km`;
-                })()}
-              </ThemedText>
+              <IconSymbol name="scalemass.fill" size={14} color={iconColor} />
+              <ThemedText style={styles.metricText}>{(item.watts / item.bodyWeightKg).toFixed(2)}W/kg</ThemedText>
             </View>
-          </>
-        ) : null}
+          ) : null}
+          {item.durationMinutes ? (
+            <View style={[styles.metric, { backgroundColor: metricBg }]}>
+              <IconSymbol name="clock" size={14} color={iconColor} />
+              <ThemedText style={styles.metricText}>{item.durationMinutes}m</ThemedText>
+            </View>
+          ) : null}
+          {item.distanceKm ? (
+            <View style={[styles.metric, { backgroundColor: metricBg }]}>
+              <IconSymbol name="map" size={14} color={iconColor} />
+              <ThemedText style={styles.metricText}>{item.distanceKm}km</ThemedText>
+            </View>
+          ) : null}
+          {item.heartRate ? (
+            <View style={[styles.metric, { backgroundColor: metricBg }]}>
+              <IconSymbol name="heart.fill" size={14} color="#ff3b30" />
+              <ThemedText style={styles.metricText}>{item.heartRate}bpm</ThemedText>
+            </View>
+          ) : null}
+          {item.calories ? (
+            <View style={[styles.metric, { backgroundColor: metricBg }]}>
+              <IconSymbol name="flame.fill" size={14} color="#ff9500" />
+              <ThemedText style={styles.metricText}>{item.calories}cal</ThemedText>
+            </View>
+          ) : null}
+          {item.incline ? (
+            <View style={[styles.metric, { backgroundColor: metricBg }]}>
+              <IconSymbol name="arrow.up.right" size={14} color={iconColor} />
+              <ThemedText style={styles.metricText}>{item.incline}% ({(Math.atan(item.incline / 100) * (180 / Math.PI)).toFixed(1)}°)</ThemedText>
+            </View>
+          ) : null}
+          {item.distanceKm && item.durationMinutes ? (
+            <>
+              <View style={[styles.metric, { backgroundColor: metricBg }]}>
+                <IconSymbol name="speedometer" size={14} color={iconColor} />
+                <ThemedText style={styles.metricText}>{(item.distanceKm / (item.durationMinutes / 60)).toFixed(1)}km/h</ThemedText>
+              </View>
+              <View style={[styles.metric, { backgroundColor: metricBg }]}>
+                <IconSymbol name="stopwatch" size={14} color={iconColor} />
+                <ThemedText style={styles.metricText}>
+                  {(() => {
+                    const pace = item.durationMinutes / item.distanceKm;
+                    const m = Math.floor(pace);
+                    const s = Math.round((pace - m) * 60);
+                    return `${m}'${s.toString().padStart(2, '0')}"/km`;
+                  })()}
+                </ThemedText>
+              </View>
+            </>
+          ) : null}
+        </View>
+        
+        {item.notes && (
+          <ThemedText style={styles.notesText}>{item.notes}</ThemedText>
+        )}
       </View>
-      
-      {item.notes && (
-        <ThemedText style={styles.notesText}>{item.notes}</ThemedText>
-      )}
-    </View>
-  );
-
-  const renderSectionHeader = ({ section: { title } }: { section: { title: Zone } }) => (
-    <ThemedView style={[styles.header, { backgroundColor: containerBg }]}>
-      <ThemedText type="title" style={styles.headerText}>{title}</ThemedText>
-    </ThemedView>
-  );
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: containerBg }]}>
-      <SectionList
-        sections={sections}
+      <View style={styles.filterContainer}>
+        {(['All', 'Zone 2', 'Zone 5'] as FilterZone[]).map((zone) => (
+          <TouchableOpacity
+            key={zone}
+            style={[
+              styles.filterButton,
+              filterZone === zone && { backgroundColor: activeTabBg, borderColor: borderColor, borderWidth: 1 }
+            ]}
+            onPress={() => setFilterZone(zone)}
+          >
+            <ThemedText style={[
+              styles.filterText,
+              filterZone === zone && { fontWeight: '600' }
+            ]}>{zone}</ThemedText>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <FlatList
+        data={filteredWorkouts}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        renderSectionHeader={renderSectionHeader}
         contentContainerStyle={styles.listContent}
-        stickySectionHeadersEnabled={true}
         ListEmptyComponent={
           <ThemedView style={styles.emptyContainer}>
             <ThemedText>No workouts logged yet.</ThemedText>
@@ -347,5 +371,34 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: 20,
     alignItems: 'center',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 10,
+  },
+  filterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+  },
+  filterText: {
+    fontSize: 14,
+  },
+  typeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  zoneBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  zoneText: {
+    fontSize: 10,
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
