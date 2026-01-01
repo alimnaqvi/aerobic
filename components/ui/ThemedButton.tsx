@@ -29,7 +29,7 @@ export function ThemedButton({
   icon,
 }: ThemedButtonProps) {
   const primaryColor = useThemeColor({}, 'tint');
-  // const backgroundColor = useThemeColor({}, 'background');
+  const backgroundColor = useThemeColor({}, 'background');
   // const textColor = useThemeColor({}, 'text');
 
   const getBackgroundColor = (pressed: boolean) => {
@@ -55,6 +55,7 @@ export function ThemedButton({
     
     switch (variant) {
       case 'primary':
+        return backgroundColor;
       case 'secondary':
       case 'danger':
         return '#FFFFFF';

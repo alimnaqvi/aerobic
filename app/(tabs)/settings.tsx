@@ -106,7 +106,7 @@ export default function SettingsScreen() {
             placeholder="70.0"
             placeholderTextColor="#999"
           />
-          <ThemedButton title="Save" onPress={handleSaveWeight} size="small" variant="secondary" />
+          <ThemedButton title="Save" onPress={handleSaveWeight} size="small" />
         </View>
         <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
       </View>
