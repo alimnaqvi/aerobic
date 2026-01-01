@@ -11,7 +11,7 @@ export interface WorkoutLog {
   distanceKm?: number;
   heartRate?: number;
   calories?: number;
-  elevation?: number;
+  incline?: number;
   notes?: string;
   tempo?: string; // e.g., "7'35""
   speed?: number; // km/h

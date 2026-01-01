@@ -26,7 +26,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
   const [distance, setDistance] = useState(initialValues?.distanceKm?.toString() || '');
   const [heartRate, setHeartRate] = useState(initialValues?.heartRate?.toString() || '');
   const [calories, setCalories] = useState(initialValues?.calories?.toString() || '');
-  const [elevation, setElevation] = useState(initialValues?.elevation?.toString() || '');
+  const [incline, setIncline] = useState(initialValues?.incline?.toString() || '');
   const [bodyWeight, setBodyWeight] = useState(initialValues?.bodyWeightKg?.toString() || '');
   const [notes, setNotes] = useState(initialValues?.notes || '');
   const [date, setDate] = useState(initialValues?.date ? new Date(initialValues.date) : new Date());
@@ -68,7 +68,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
           setDistance(lastWorkout.distanceKm?.toString() || '');
           setHeartRate(lastWorkout.heartRate?.toString() || '');
           setCalories(lastWorkout.calories?.toString() || '');
-          setElevation(lastWorkout.elevation?.toString() || '');
+          setIncline(lastWorkout.incline?.toString() || '');
           // Note: We don't overwrite bodyWeight here, as it should come from settings or be current
         } else {
           // Reset if no previous workout found (optional, but cleaner)
@@ -77,7 +77,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
           setDistance('');
           setHeartRate('');
           setCalories('');
-          setElevation('');
+          setIncline('');
         }
       };
       loadLastWorkout();
@@ -95,7 +95,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
       distanceKm: distance ? parseFloat(distance) : undefined,
       heartRate: heartRate ? parseInt(heartRate) : undefined,
       calories: calories ? parseInt(calories) : undefined,
-      elevation: elevation ? parseInt(elevation) : undefined,
+      incline: incline ? parseInt(incline) : undefined,
       bodyWeightKg: bodyWeight ? parseFloat(bodyWeight) : undefined,
       notes: notes || undefined,
     };
@@ -253,11 +253,11 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
           </View>
 
           <View style={styles.inputRow}>
-            <ThemedText type="subtitle" style={styles.label}>Elevation (m)</ThemedText>
+            <ThemedText type="subtitle" style={styles.label}>Incline (%)</ThemedText>
             <TextInput
               style={inputStyle}
-              value={elevation}
-              onChangeText={setElevation}
+              value={incline}
+              onChangeText={setIncline}
               keyboardType="numeric"
               placeholder="0"
               placeholderTextColor={placeholderColor}

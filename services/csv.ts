@@ -14,7 +14,7 @@ const CSV_HEADER = [
   'distance_km',
   'heart_rate',
   'calories',
-  'elevation_m',
+  'incline_percent',
   'body_weight_kg',
   'notes'
 ];
@@ -34,7 +34,7 @@ export const CsvService = {
         distance_km: w.distanceKm || '',
         heart_rate: w.heartRate || '',
         calories: w.calories || '',
-        elevation_m: w.elevation || '',
+        incline_percent: w.incline || '',
         body_weight_kg: w.bodyWeightKg || '',
         notes: w.notes || ''
       }));
@@ -88,7 +88,7 @@ export const CsvService = {
                   distanceKm: row.distance_km && row.distance_km !== '-' ? parseFloat(row.distance_km) : undefined,
                   heartRate: row.heart_rate && row.heart_rate !== '-' ? parseFloat(row.heart_rate) : undefined,
                   calories: row.calories && row.calories !== '-' ? parseFloat(row.calories) : undefined,
-                  elevation: row.elevation_m && row.elevation_m !== '-' ? parseFloat(row.elevation_m) : undefined,
+                  incline: row.incline_percent && row.incline_percent !== '-' ? parseFloat(row.incline_percent) : undefined,
                   bodyWeightKg: row.body_weight_kg && row.body_weight_kg !== '-' ? parseFloat(row.body_weight_kg) : undefined,
                   notes: row.notes || undefined
                 };
