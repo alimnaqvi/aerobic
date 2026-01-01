@@ -29,8 +29,8 @@ export function ThemedButton({
   icon,
 }: ThemedButtonProps) {
   const primaryColor = useThemeColor({}, 'tint');
-  const backgroundColor = useThemeColor({}, 'background');
-  const textColor = useThemeColor({}, 'text');
+  // const backgroundColor = useThemeColor({}, 'background');
+  // const textColor = useThemeColor({}, 'text');
 
   const getBackgroundColor = (pressed: boolean) => {
     if (disabled) return '#A0A0A0';

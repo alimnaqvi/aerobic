@@ -42,7 +42,7 @@ export default function EditWorkoutScreen() {
       }
     };
     loadWorkout();
-  }, [id, router]);
+  }, [id, router, showToast]);
 
   const handleSave = async (updatedWorkout: WorkoutLog) => {
     await StorageService.updateWorkout(updatedWorkout);

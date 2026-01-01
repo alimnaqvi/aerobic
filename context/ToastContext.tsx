@@ -12,7 +12,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState('');
   const [type, setType] = useState<ToastType>('info');
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const [timer, setTimer] = useState<number | null>(null);
 
   const showToast = useCallback((msg: string, toastType: ToastType = 'info') => {
     if (timer) clearTimeout(timer);
