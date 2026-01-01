@@ -19,7 +19,7 @@ export interface WorkoutFormRef {
 }
 
 export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initialValues, onSubmit, submitLabel, title }, ref) => {
-  const [type, setType] = useState<WorkoutType>(initialValues?.type || 'Running');
+  const [type, setType] = useState<WorkoutType>(initialValues?.type || 'Treadmill');
   const [zone, setZone] = useState<Zone>(initialValues?.zone || 'Zone 2');
   const [duration, setDuration] = useState(initialValues?.durationMinutes?.toString() || '');
   const [watts, setWatts] = useState(initialValues?.watts?.toString() || '');
@@ -157,7 +157,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Type</ThemedText>
             <View style={[styles.segmentedControl, { backgroundColor: segmentBg }]}>
-              {(['Running', 'Cycling', 'Other'] as WorkoutType[]).map((t) => (
+              {(['Treadmill', 'Cycling', 'Other'] as WorkoutType[]).map((t) => (
                 <TouchableOpacity
                   key={t}
                   style={[styles.segmentButton, type === t && { backgroundColor: segmentActiveBg }]}

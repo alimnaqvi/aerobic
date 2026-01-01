@@ -1,4 +1,4 @@
-export type WorkoutType = 'Running' | 'Cycling' | 'Other';
+export type WorkoutType = 'Treadmill' | 'Cycling' | 'Other';
 export type Zone = 'Zone 2' | 'Zone 5';
 
 export interface WorkoutLog {
