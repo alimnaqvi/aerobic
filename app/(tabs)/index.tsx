@@ -25,7 +25,7 @@ export default function HistoryScreen() {
 
   const containerBg = useThemeColor({ light: '#f8f9fa', dark: '#000000' }, 'background');
   const cardBg = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
-  const zone5Bg = useThemeColor({ light: '#fff5f5', dark: '#2a1c1c' }, 'background');
+  // const zone5Bg = useThemeColor({ light: '#fff5f5', dark: '#2a1c1c' }, 'background');
   const menuBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
   const metricBg = useThemeColor({ light: '#f5f5f5', dark: '#2C2C2E' }, 'background');
   const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
@@ -117,7 +117,7 @@ export default function HistoryScreen() {
 
   const renderItem = ({ item }: { item: WorkoutLog }) => {
     const isZone5 = item.zone === 'Zone 5';
-    const backgroundColor = filterZone === 'All' && isZone5 ? zone5Bg : cardBg;
+    const backgroundColor = cardBg; // or to make Zone 5 background red: backgroundColor = filterZone === 'All' && isZone5 ? zone5Bg : cardBg;
 
     return (
       <View style={[styles.card, { backgroundColor, borderColor }]}>
