@@ -112,7 +112,7 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
           </TouchableOpacity>
         </View>
 
-        <View style={styles.filterContainer}>
+        <View style={[styles.filterContainer, { borderBottomColor: borderColor }]}>
           {(['Zone 2', 'Zone 5'] as Zone[]).map((zone) => (
             <TouchableOpacity
               key={zone}
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: 'transparent',
     gap: 10,
   },
   filterButton: {

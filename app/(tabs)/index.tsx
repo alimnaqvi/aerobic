@@ -204,7 +204,7 @@ export default function HistoryScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: containerBg }]}>
-      <View style={styles.filterContainer}>
+      <View style={[styles.filterContainer, { borderBottomColor: borderColor }]}>
         {(['All', 'Zone 2', 'Zone 5'] as FilterZone[]).map((zone) => (
           <TouchableOpacity
             key={zone}
@@ -371,6 +371,7 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: 20,
     alignItems: 'center',
+    borderRadius: 10,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -382,7 +383,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: 'transparent',
     gap: 10,
   },
   filterButton: {
