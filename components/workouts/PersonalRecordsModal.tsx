@@ -19,6 +19,7 @@ interface PRStats {
   maxWattsPerKg?: PRRecord;
   maxDistance?: PRRecord;
   maxDuration?: PRRecord;
+  maxSpeed?: PRRecord;
 }
 
 export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRecordsModalProps) {
@@ -59,6 +60,14 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
       // Max Duration
       if (durationMinutes && (!currentStats.maxDuration || durationMinutes > currentStats.maxDuration.value)) {
         currentStats.maxDuration = { value: durationMinutes, date };
+      }
+
+      // Max Speed
+      if (distanceKm && durationMinutes) {
+        const speed = distanceKm / (durationMinutes / 60);
+        if (!currentStats.maxSpeed || speed > currentStats.maxSpeed.value) {
+          currentStats.maxSpeed = { value: speed, date };
+        }
       }
     });
 
@@ -112,6 +121,7 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
                   <View style={styles.grid}>
                     {renderPRItem('Best Power', stats.maxWatts, 'W')}
                     {renderPRItem('Best W/kg', stats.maxWattsPerKg, 'W/kg', true)}
+                    {renderPRItem('Best Speed', stats.maxSpeed, 'km/h', true)}
                     {renderPRItem('Longest Dist', stats.maxDistance, 'km', true)}
                     {renderPRItem('Longest Time', stats.maxDuration, 'min')}
                   </View>

@@ -35,6 +35,9 @@ const MAPPING = {
   'trophy.fill': 'emoji-events',
   'xmark.circle.fill': 'cancel',
   'scalemass.fill': 'fitness-center',
+  'arrow.up.right': 'trending-up',
+  'speedometer': 'speed',
+  'stopwatch': 'timer',
 } as IconMapping;
 
 /**

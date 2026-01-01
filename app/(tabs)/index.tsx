@@ -155,6 +155,31 @@ export default function HistoryScreen() {
             <ThemedText style={styles.metricText}>{item.calories}cal</ThemedText>
           </View>
         ) : null}
+        {item.incline ? (
+          <View style={[styles.metric, { backgroundColor: metricBg }]}>
+            <IconSymbol name="arrow.up.right" size={14} color={iconColor} />
+            <ThemedText style={styles.metricText}>{item.incline}% ({(Math.atan(item.incline / 100) * (180 / Math.PI)).toFixed(1)}°)</ThemedText>
+          </View>
+        ) : null}
+        {item.distanceKm && item.durationMinutes ? (
+          <>
+            <View style={[styles.metric, { backgroundColor: metricBg }]}>
+              <IconSymbol name="speedometer" size={14} color={iconColor} />
+              <ThemedText style={styles.metricText}>{(item.distanceKm / (item.durationMinutes / 60)).toFixed(1)}km/h</ThemedText>
+            </View>
+            <View style={[styles.metric, { backgroundColor: metricBg }]}>
+              <IconSymbol name="stopwatch" size={14} color={iconColor} />
+              <ThemedText style={styles.metricText}>
+                {(() => {
+                  const pace = item.durationMinutes / item.distanceKm;
+                  const m = Math.floor(pace);
+                  const s = Math.round((pace - m) * 60);
+                  return `${m}'${s.toString().padStart(2, '0')}"/km`;
+                })()}
+              </ThemedText>
+            </View>
+          </>
+        ) : null}
       </View>
       
       {item.notes && (
