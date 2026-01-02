@@ -298,10 +298,10 @@ export const StorageService = {
   },
 
   // New method to sync local data to cloud after login
-  async syncLocalToCloud(): Promise<void> {
+  async syncLocalToCloud(): Promise<{ pushed: number; total: number }> {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
+      if (!session?.user) return { pushed: 0, total: 0 };
 
       // Sync Settings (Body Weight)
       const settings = await this.getSettings();
@@ -316,34 +316,40 @@ export const StorageService = {
       const localJson = await AsyncStorage.getItem(STORAGE_KEY);
       const localWorkouts: WorkoutLog[] = localJson != null ? JSON.parse(localJson) : [];
 
-      if (localWorkouts.length === 0) return;
+      let pushedCount = 0;
 
-      // Upsert all local workouts to Supabase
-      const rows = localWorkouts.map(w => ({
-        id: w.id,
-        user_id: session.user.id,
-        date: w.date,
-        type: w.type,
-        zone: w.zone,
-        duration_minutes: w.durationMinutes,
-        watts: w.watts,
-        distance_km: w.distanceKm,
-        heart_rate: w.heartRate,
-        calories: w.calories,
-        incline: w.incline,
-        body_weight_kg: w.bodyWeightKg,
-        notes: w.notes,
-      }));
+      if (localWorkouts.length > 0) {
+        // Upsert all local workouts to Supabase
+        const rows = localWorkouts.map(w => ({
+          id: w.id,
+          user_id: session.user.id,
+          date: w.date,
+          type: w.type,
+          zone: w.zone,
+          duration_minutes: w.durationMinutes,
+          watts: w.watts,
+          distance_km: w.distanceKm,
+          heart_rate: w.heartRate,
+          calories: w.calories,
+          incline: w.incline,
+          body_weight_kg: w.bodyWeightKg,
+          notes: w.notes,
+        }));
 
-      const { error } = await supabase.from('workouts').upsert(rows, { onConflict: 'id' });
-      if (error) {
-        console.error('Sync failed', error);
-      } else {
-        // After pushing, pull everything to ensure consistency
-        await this.getWorkouts();
+        const { error } = await supabase.from('workouts').upsert(rows, { onConflict: 'id' });
+        if (error) {
+          console.error('Sync failed', error);
+        } else {
+          pushedCount = rows.length;
+        }
       }
+
+      // After pushing, pull everything to ensure consistency
+      const allWorkouts = await this.getWorkouts();
+      return { pushed: pushedCount, total: allWorkouts.length };
     } catch (e) {
       console.error('Sync error', e);
+      return { pushed: 0, total: 0 };
     }
   }
 };

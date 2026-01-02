@@ -94,6 +94,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+    flex: 1, // Ensure text wraps and doesn't push layout
+    flexWrap: 'wrap',
   },
   closeButton: {
     padding: 4,

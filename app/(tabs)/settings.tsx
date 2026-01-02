@@ -78,28 +78,28 @@ export default function SettingsScreen() {
 
   const handleSignIn = async () => {
     if (!email) {
-      showToast('Please enter your email.', 'error');
+      showToast('Please enter your email.', 'error', { hideInRoot: true });
       return;
     }
     const { error } = await signInWithOtp(email);
     if (error) {
-      showToast(error.message, 'error');
+      showToast(error.message, 'error', { hideInRoot: true });
     } else {
-      showToast('Check your email for the login link or code!', 'success');
+      showToast('Check your email for the login link or code!', 'success', { hideInRoot: true });
       setShowOtpInput(true);
     }
   };
 
   const handleVerifyOtp = async () => {
     if (!otp || otp.length !== 8) {
-      showToast('Please enter a valid 8-digit code.', 'error');
+      showToast('Please enter a valid 8-digit code.', 'error', { hideInRoot: true });
       return;
     }
     const { error } = await verifyOtp(email, otp);
     if (error) {
-      showToast(error.message, 'error');
+      showToast(error.message, 'error', { hideInRoot: true });
     } else {
-      showToast('Signed in successfully!', 'success');
+      showToast('Signed in successfully!', 'success', { hideInRoot: true });
       setIsLoginModalVisible(false);
       setShowOtpInput(false);
       setOtp('');
@@ -150,9 +150,9 @@ export default function SettingsScreen() {
   const handleSync = async () => {
     if (!user) return;
     setIsSyncing(true);
-    await StorageService.syncLocalToCloud();
+    const { pushed, total } = await StorageService.syncLocalToCloud();
     setIsSyncing(false);
-    showToast('Sync complete!', 'success');
+    showToast(`Sync complete! Pushed ${pushed} local workouts. Total: ${total}.`, 'success');
   };
 
   const handleExport = async () => {
