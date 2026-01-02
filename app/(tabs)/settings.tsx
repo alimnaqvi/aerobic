@@ -67,6 +67,14 @@ export default function SettingsScreen() {
     showToast('Body weight saved!', 'success');
   };
 
+  const handleClearWeight = async () => {
+    await StorageService.clearBodyWeight();
+    setBodyWeight('');
+    setTempWeight('');
+    setIsWeightModalVisible(false);
+    showToast('Body weight cleared!', 'success');
+  };
+
   const handleSignIn = async () => {
     if (!email) {
       showToast('Please enter your email.', 'error');
@@ -82,8 +90,8 @@ export default function SettingsScreen() {
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp || otp.length !== 8) {
-      showToast('Please enter a valid 8-digit code.', 'error');
+    if (!otp || otp.length !== 6) {
+      showToast('Please enter a valid 6-digit code.', 'error');
       return;
     }
     const { error } = await verifyOtp(email, otp);
@@ -94,6 +102,9 @@ export default function SettingsScreen() {
       setIsLoginModalVisible(false);
       setShowOtpInput(false);
       setOtp('');
+      
+      // Auto-sync after login
+      handleSync();
     }
   };
 
@@ -310,6 +321,7 @@ export default function SettingsScreen() {
               autoFocus
             />
             <ThemedButton title="Save" onPress={handleSaveWeight} size="large" style={{ marginTop: 20 }} />
+            <ThemedButton title="Clear" onPress={handleClearWeight} variant="ghost" style={{ marginTop: 10 }} />
           </View>
         </ThemedView>
       </ThemedModal>

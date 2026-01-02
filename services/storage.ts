@@ -62,10 +62,36 @@ export const StorageService = {
     }
   },
 
+  async clearBodyWeight(): Promise<void> {
+    try {
+      // Clear locally
+      const current = await this.getSettings();
+      const newSettings = { ...current, bodyWeightKg: undefined };
+      await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
+
+      // Clear from Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ body_weight_kg: null, updated_at: new Date() })
+          .eq('id', session.user.id);
+          
+        if (error) console.error('Failed to clear body weight from Supabase', error);
+      }
+    } catch (e) {
+      console.error('Failed to clear body weight', e);
+    }
+  },
+
   async getWorkouts(): Promise<WorkoutLog[]> {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
+      // Always get local first
+      const localJson = await AsyncStorage.getItem(STORAGE_KEY);
+      const localWorkouts: WorkoutLog[] = localJson != null ? JSON.parse(localJson) : [];
+
       if (session?.user) {
         // Fetch from Supabase
         const { data, error } = await supabase
@@ -86,20 +112,29 @@ export const StorageService = {
             heartRate: row.heart_rate,
             calories: row.calories,
             incline: row.incline,
-            bodyWeightKg: row.body_weight_kg,
+            body_weight_kg: row.body_weight_kg,
             notes: row.notes,
           }));
 
-          // Update local cache (overwrite or merge?)
-          // For simplicity, we'll overwrite local with remote source of truth when online
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(remoteWorkouts));
-          return remoteWorkouts;
+          // Merge Strategy: Union of Remote and Local-Only
+          // If an ID exists in Remote, we use Remote (Server Authority)
+          // If an ID exists only in Local, we keep it (Offline creation)
+          
+          const remoteIds = new Set(remoteWorkouts.map(w => w.id));
+          const localOnly = localWorkouts.filter(w => !remoteIds.has(w.id));
+          
+          const mergedWorkouts = [...remoteWorkouts, ...localOnly];
+          
+          // Sort by date descending
+          mergedWorkouts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+          // Update local cache
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(mergedWorkouts));
+          return mergedWorkouts;
         }
       }
 
-      // Fallback to local
-      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-      return jsonValue != null ? JSON.parse(jsonValue) : [];
+      return localWorkouts;
     } catch (e) {
       console.error('Failed to fetch workouts', e);
       // Fallback to local on error
@@ -202,21 +237,26 @@ export const StorageService = {
   async clearWorkouts(): Promise<void> {
     try {
       await AsyncStorage.removeItem(STORAGE_KEY);
+      await AsyncStorage.removeItem(SETTINGS_KEY); // Clear settings too
       
-      // Clear from Supabase? Maybe not "Clear All Data" button should wipe cloud unless explicit.
-      // The user prompt said "Clear All Data: Are you sure you want to delete all workouts?".
-      // I'll assume this means deleting from cloud too if logged in.
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { error } = await supabase
+        const { error: wError } = await supabase
           .from('workouts')
           .delete()
           .eq('user_id', session.user.id);
           
-        if (error) console.error('Failed to clear workouts from Supabase', error);
+        if (wError) console.error('Failed to clear workouts from Supabase', wError);
+
+        const { error: pError } = await supabase
+          .from('profiles')
+          .update({ body_weight_kg: null, updated_at: new Date() })
+          .eq('id', session.user.id);
+
+        if (pError) console.error('Failed to clear profile from Supabase', pError);
       }
     } catch (e) {
-      console.error('Failed to clear workouts', e);
+      console.error('Failed to clear data', e);
     }
   },
 
@@ -263,16 +303,22 @@ export const StorageService = {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
+      // Sync Settings (Body Weight)
+      const settings = await this.getSettings();
+      if (settings.bodyWeightKg) {
+        await supabase.from('profiles').upsert({
+          id: session.user.id,
+          body_weight_kg: settings.bodyWeightKg,
+          updated_at: new Date(),
+        });
+      }
+
       const localJson = await AsyncStorage.getItem(STORAGE_KEY);
       const localWorkouts: WorkoutLog[] = localJson != null ? JSON.parse(localJson) : [];
 
       if (localWorkouts.length === 0) return;
 
       // Upsert all local workouts to Supabase
-      // Note: This might overwrite remote data if IDs match. 
-      // Ideally we should check timestamps, but for now we assume local is fresh if we are syncing up.
-      // Actually, a better approach is to fetch remote, merge, and save back.
-      
       const rows = localWorkouts.map(w => ({
         id: w.id,
         user_id: session.user.id,
