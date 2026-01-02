@@ -25,11 +25,12 @@ interface PRStats {
 
 export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRecordsModalProps) {
   const [selectedZone, setSelectedZone] = useState<Zone>('Zone 2');
-  const backgroundColor = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
-  const headerBg = useThemeColor({ light: '#f8f9fa', dark: '#000000' }, 'background');
-  const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
+  const backgroundColor = useThemeColor({}, 'card');
+  const headerBg = useThemeColor({}, 'headerBackground');
+  const borderColor = useThemeColor({}, 'border');
   const iconColor = useThemeColor({}, 'icon');
-  const activeTabBg = useThemeColor({ light: '#e0e0e0', dark: '#3a3a3c' }, 'background');
+  const activeTabBg = useThemeColor({}, 'element');
+  const prItemBg = useThemeColor({}, 'element');
 
   const prs = useMemo(() => {
     const stats: Record<string, Record<string, PRStats>> = {};
@@ -85,7 +86,7 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
   const renderPRItem = (label: string, record?: PRRecord, unit: string = '', isDecimal: boolean = false) => {
     if (!record) return null;
     return (
-      <View style={[styles.prItem, { borderColor }]}>
+      <View style={[styles.prItem, { borderColor, backgroundColor: prItemBg }]}>
         <ThemedText style={styles.prLabel}>{label}</ThemedText>
         <View style={styles.prValueContainer}>
           <ThemedText type="defaultSemiBold" style={styles.prValue}>
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    backgroundColor: 'rgba(150, 150, 150, 0.1)',
+    // backgroundColor: 'rgba(150, 150, 150, 0.1)',
   },
   prLabel: {
     fontSize: 12,

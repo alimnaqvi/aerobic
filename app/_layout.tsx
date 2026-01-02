@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
 
+import { Colors } from '@/constants/theme';
 import { ToastProvider } from '@/context/ToastContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -13,10 +14,37 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const theme = colorScheme ?? 'light';
+
+  const CustomDarkTheme = {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      background: Colors.dark.background,
+      card: Colors.dark.headerBackground,
+      text: Colors.dark.text,
+      border: Colors.dark.border,
+      notification: Colors.dark.danger,
+      primary: Colors.dark.tint,
+    },
+  };
+
+  const CustomLightTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: Colors.light.background,
+      card: Colors.light.headerBackground,
+      text: Colors.light.text,
+      border: Colors.light.border,
+      notification: Colors.light.danger,
+      primary: Colors.light.tint,
+    },
+  };
 
   const content = (
     <ToastProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
@@ -28,7 +56,7 @@ export default function RootLayout() {
 
   if (Platform.OS === 'web') {
     return (
-      <View style={[styles.webContainer, { backgroundColor: colorScheme === 'dark' ? '#000' : '#f0f0f0' }]}>
+      <View style={[styles.webContainer, { backgroundColor: Colors[theme].background }]}>
         <View style={styles.webContent}>
           {content}
         </View>

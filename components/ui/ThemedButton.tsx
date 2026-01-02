@@ -29,19 +29,20 @@ export function ThemedButton({
   icon,
 }: ThemedButtonProps) {
   const primaryColor = useThemeColor({}, 'tint');
-  const backgroundColor = useThemeColor({}, 'background');
-  // const textColor = useThemeColor({}, 'text');
-
+  const dangerColor = useThemeColor({}, 'danger');
+  const secondaryColor = useThemeColor({}, 'element');
+  const backgroundColor = useThemeColor({}, 'card');
+  
   const getBackgroundColor = (pressed: boolean) => {
-    if (disabled) return '#A0A0A0';
+    if (disabled) return '#A0A0A0'; // Maybe use a 'disabled' color from theme?
     
     switch (variant) {
       case 'primary':
-        return pressed ? opacity(primaryColor, 0.8) : primaryColor;
+        return pressed ? primaryColor : primaryColor; // Opacity handled by style usually, but here explicit.
       case 'secondary':
-        return pressed ? '#505050' : '#3A3A3C'; // Dark gray for secondary
+        return pressed ? secondaryColor : secondaryColor;
       case 'danger':
-        return pressed ? '#D32F2F' : '#F44336';
+        return pressed ? dangerColor : dangerColor;
       case 'outline':
       case 'ghost':
         return 'transparent';

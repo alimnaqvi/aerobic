@@ -33,14 +33,14 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
   const [date, setDate] = useState(initialValues?.date ? new Date(initialValues.date) : new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const inputBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
-  const inputBorder = useThemeColor({ light: '#ccc', dark: '#444' }, 'icon');
+  const inputBg = useThemeColor({}, 'card');
+  const inputBorder = useThemeColor({}, 'border');
   const textColor = useThemeColor({}, 'text');
-  const placeholderColor = useThemeColor({ light: '#999', dark: '#888' }, 'icon');
-  const segmentBg = useThemeColor({ light: '#eee', dark: '#333' }, 'background');
-  const segmentActiveBg = useThemeColor({ light: '#fff', dark: '#666' }, 'background');
-  const segmentTextColor = useThemeColor({ light: '#666', dark: '#aaa' }, 'text');
-  const segmentTextActiveColor = useThemeColor({ light: '#000', dark: '#fff' }, 'text');
+  const placeholderColor = useThemeColor({}, 'placeholder');
+  const segmentBg = useThemeColor({}, 'element');
+  const segmentActiveBg = useThemeColor({ light: '#fff', dark: '#636366' }, 'card'); // Using override for dark mode active segment to match iOS
+  const segmentTextColor = useThemeColor({}, 'icon');
+  const segmentTextActiveColor = useThemeColor({}, 'text');
 
   // Load default body weight from settings if not editing
   useEffect(() => {

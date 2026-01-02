@@ -23,14 +23,14 @@ export default function HistoryScreen() {
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
 
-  const containerBg = useThemeColor({ light: '#f8f9fa', dark: '#000000' }, 'background');
-  const cardBg = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
+  const containerBg = useThemeColor({}, 'background');
+  const cardBg = useThemeColor({}, 'card');
   // const zone5Bg = useThemeColor({ light: '#fff5f5', dark: '#2a1c1c' }, 'background');
-  const menuBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
-  const metricBg = useThemeColor({ light: '#f5f5f5', dark: '#2C2C2E' }, 'background');
-  const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
+  const menuBg = useThemeColor({}, 'card');
+  const metricBg = useThemeColor({}, 'element');
+  const borderColor = useThemeColor({}, 'border');
   const iconColor = useThemeColor({}, 'icon');
-  const activeTabBg = useThemeColor({ light: '#e0e0e0', dark: '#3a3a3c' }, 'background');
+  const activeTabBg = useThemeColor({}, 'element');
 
   useEffect(() => {
     navigation.setOptions({

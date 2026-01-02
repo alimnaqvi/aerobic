@@ -17,12 +17,12 @@ export default function SettingsScreen() {
   const [tempWeight, setTempWeight] = useState('');
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   
-  const inputBg = useThemeColor({ light: '#fff', dark: '#2C2C2E' }, 'background');
-  const inputBorder = useThemeColor({ light: '#ccc', dark: '#444' }, 'icon');
+  const inputBg = useThemeColor({}, 'card');
+  const inputBorder = useThemeColor({}, 'border');
   const textColor = useThemeColor({}, 'text');
-  const modalBg = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
-  const headerBg = useThemeColor({ light: '#f8f9fa', dark: '#000000' }, 'background');
-  const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
+  const modalBg = useThemeColor({}, 'card');
+  const headerBg = useThemeColor({}, 'headerBackground');
+  const borderColor = useThemeColor({}, 'border');
   const iconColor = useThemeColor({}, 'icon');
   
   const { showToast } = useToast();

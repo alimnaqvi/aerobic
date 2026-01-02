@@ -27,10 +27,10 @@ export function ThemedListItem({
   isLast = false,
   isFirst = false,
 }: ThemedListItemProps) {
-  const backgroundColor = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
-  const borderColor = useThemeColor({ light: '#eee', dark: '#333' }, 'icon');
-  const destructiveColor = '#ff3b30';
-  const chevronColor = useThemeColor({ light: '#C7C7CC', dark: '#545458' }, 'icon');
+  const backgroundColor = useThemeColor({}, 'card');
+  const borderColor = useThemeColor({}, 'border');
+  const destructiveColor = useThemeColor({}, 'danger');
+  const chevronColor = useThemeColor({}, 'placeholder');
 
   return (
     <Pressable

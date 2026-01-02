@@ -9,8 +9,8 @@ interface ThemedModalProps extends ModalProps {
 }
 
 export function ThemedModal({ visible, onClose, children, ...props }: ThemedModalProps) {
-  const overlayColor = useThemeColor({ light: 'rgba(0,0,0,0.5)', dark: 'rgba(0,0,0,0.7)' }, 'background');
-  const backgroundColor = useThemeColor({ light: '#fff', dark: '#1C1C1E' }, 'background');
+  const overlayColor = useThemeColor({}, 'modalOverlay');
+  const backgroundColor = useThemeColor({}, 'card');
 
   if (Platform.OS === 'web') {
     return (
