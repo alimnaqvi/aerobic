@@ -4,6 +4,7 @@ import { ThemedButton } from '@/components/ui/ThemedButton';
 import { ThemedListItem } from '@/components/ui/ThemedListItem';
 import { ThemedModal } from '@/components/ui/ThemedModal';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { CsvService } from '@/services/csv';
@@ -17,6 +18,12 @@ export default function SettingsScreen() {
   const [tempWeight, setTempWeight] = useState('');
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   
+  // Auth State
+  const { user, signInWithOtp, signOut } = useAuth();
+  const [email, setEmail] = useState('');
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const inputBg = useThemeColor({}, 'card');
   const inputBorder = useThemeColor({}, 'border');
   const textColor = useThemeColor({}, 'text');
@@ -29,12 +36,14 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     loadSettings();
-  }, []);
+  }, [user]); // Reload settings when user changes (login/logout)
 
   const loadSettings = async () => {
     const settings = await StorageService.getSettings();
     if (settings.bodyWeightKg) {
       setBodyWeight(settings.bodyWeightKg.toString());
+    } else {
+      setBodyWeight('');
     }
   };
 
@@ -53,6 +62,33 @@ export default function SettingsScreen() {
     setBodyWeight(weight.toString());
     setIsWeightModalVisible(false);
     showToast('Body weight saved!', 'success');
+  };
+
+  const handleSignIn = async () => {
+    if (!email) {
+      showToast('Please enter your email.', 'error');
+      return;
+    }
+    const { error } = await signInWithOtp(email);
+    if (error) {
+      showToast(error.message, 'error');
+    } else {
+      showToast('Check your email for the login link!', 'success');
+      setIsLoginModalVisible(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    showToast('Signed out successfully.', 'success');
+  };
+
+  const handleSync = async () => {
+    if (!user) return;
+    setIsSyncing(true);
+    await StorageService.syncLocalToCloud();
+    setIsSyncing(false);
+    showToast('Sync complete!', 'success');
   };
 
   const handleExport = async () => {
@@ -113,6 +149,42 @@ export default function SettingsScreen() {
     <ThemedView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
+          <ThemedText type="subtitle" style={styles.sectionHeader}>Account</ThemedText>
+          {user ? (
+            <>
+              <ThemedListItem 
+                title="Email" 
+                value={user.email} 
+                showChevron={false}
+                isFirst
+              />
+              <ThemedListItem 
+                title="Sync Now" 
+                onPress={handleSync} 
+                icon={isSyncing ? <IconSymbol name="arrow.triangle.2.circlepath" size={20} color={iconColor} /> : undefined}
+              />
+              <ThemedListItem 
+                title="Sign Out" 
+                onPress={handleSignOut} 
+                variant="destructive"
+                showChevron={false}
+                isLast
+              />
+            </>
+          ) : (
+            <ThemedListItem 
+              title="Sign In / Sign Up" 
+              onPress={() => setIsLoginModalVisible(true)} 
+              isFirst
+              isLast
+            />
+          )}
+          <ThemedText style={styles.hint}>
+            {user ? 'Your workouts are synced to the cloud.' : 'Sign in to sync your workouts across devices.'}
+          </ThemedText>
+        </View>
+
+        <View style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionHeader}>Profile</ThemedText>
           <ThemedListItem 
             title="Set Body Weight" 
@@ -171,6 +243,40 @@ export default function SettingsScreen() {
               autoFocus
             />
             <ThemedButton title="Save" onPress={handleSaveWeight} size="large" style={{ marginTop: 20 }} />
+          </View>
+        </ThemedView>
+      </ThemedModal>
+
+      <ThemedModal
+        visible={isLoginModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onClose={() => setIsLoginModalVisible(false)}
+      >
+        <ThemedView style={[styles.modalContainer, { backgroundColor: modalBg }]}>
+          <View style={[styles.modalHeader, { backgroundColor: headerBg, borderBottomColor: borderColor }]}>
+            <ThemedText type="title">Sign In</ThemedText>
+            <TouchableOpacity onPress={() => setIsLoginModalVisible(false)} style={styles.closeButton}>
+              <IconSymbol name="xmark.circle.fill" size={30} color={iconColor} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalContent}>
+            <ThemedText style={styles.modalLabel}>Enter your email to receive a magic link:</ThemedText>
+            <TextInput
+              style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholder="hello@example.com"
+              placeholderTextColor="#999"
+              autoFocus
+            />
+            <ThemedButton title="Send Magic Link" onPress={handleSignIn} size="large" style={{ marginTop: 20 }} />
+            <ThemedText style={[styles.hint, { marginTop: 20, textAlign: 'center' }]}>
+              We&apos;ll send you an email with a link to sign in. No password required.
+            </ThemedText>
           </View>
         </ThemedView>
       </ThemedModal>

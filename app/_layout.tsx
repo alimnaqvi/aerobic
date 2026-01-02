@@ -5,6 +5,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { Colors } from '@/constants/theme';
+import { AuthProvider } from '@/context/AuthContext';
 import { ToastProvider } from '@/context/ToastContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -43,15 +44,17 @@ export default function RootLayout() {
   };
 
   const content = (
-    <ToastProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </ToastProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </ToastProvider>
+    </AuthProvider>
   );
 
   if (Platform.OS === 'web') {
