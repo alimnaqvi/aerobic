@@ -28,7 +28,7 @@ export default function RootLayout() {
 
   if (Platform.OS === 'web') {
     return (
-      <View style={styles.webContainer}>
+      <View style={[styles.webContainer, { backgroundColor: colorScheme === 'dark' ? '#000' : '#f0f0f0' }]}>
         <View style={styles.webContent}>
           {content}
         </View>
@@ -42,7 +42,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   webContainer: {
     flex: 1,
-    backgroundColor: 'transparent', // Background for the outer area
+    backgroundColor: '#000', // Background for the outer area
     alignItems: 'center',
     justifyContent: 'center',
   },
