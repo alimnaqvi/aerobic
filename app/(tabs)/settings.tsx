@@ -3,6 +3,7 @@ import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/ThemedButton';
 import { ThemedListItem } from '@/components/ui/ThemedListItem';
 import { ThemedModal } from '@/components/ui/ThemedModal';
+import { Toast } from '@/components/ui/Toast';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -35,7 +36,7 @@ export default function SettingsScreen() {
   const iconColor = useThemeColor({}, 'icon');
   const dangerColor = useThemeColor({}, 'danger');
   
-  const { showToast } = useToast();
+  const { showToast, hideToast, visible: toastVisible, message: toastMessage, type: toastType } = useToast();
 
   useEffect(() => {
     loadSettings();
@@ -325,6 +326,12 @@ export default function SettingsScreen() {
             <ThemedButton title="Save" onPress={handleSaveWeight} size="large" style={{ marginTop: 20 }} />
             <ThemedButton title="Clear" onPress={handleClearWeight} variant="ghost" style={{ marginTop: 10 }} />
           </View>
+          <Toast 
+            message={toastMessage} 
+            type={toastType} 
+            visible={toastVisible} 
+            onDismiss={hideToast} 
+          />
         </ThemedView>
       </ThemedModal>
 
@@ -379,6 +386,12 @@ export default function SettingsScreen() {
               </>
             )}
           </View>
+          <Toast 
+            message={toastMessage} 
+            type={toastType} 
+            visible={toastVisible} 
+            onDismiss={hideToast} 
+          />
         </ThemedView>
       </ThemedModal>
     </ThemedView>

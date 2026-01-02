@@ -4,6 +4,9 @@ import React, { createContext, ReactNode, useCallback, useContext, useState } fr
 interface ToastContextType {
   showToast: (message: string, type?: ToastType) => void;
   hideToast: () => void;
+  visible: boolean;
+  message: string;
+  type: ToastType;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -34,7 +37,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [timer]);
 
   return (
-    <ToastContext.Provider value={{ showToast, hideToast }}>
+    <ToastContext.Provider value={{ showToast, hideToast, visible, message, type }}>
       {children}
       <Toast 
         message={message} 
