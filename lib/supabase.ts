@@ -4,6 +4,7 @@ import { AppState, Platform } from 'react-native';
 import 'react-native-url-polyfill/auto';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+// TODO: Replace anon key with publishable key after Supabase fixes the bug in createClient function
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
 const ExpoStorage = {
