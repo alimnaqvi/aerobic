@@ -149,7 +149,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
                   display="default"
                   onChange={onDateChange}
                   style={styles.datePicker}
-                  themeVariant={inputBg === '#fff' ? 'light' : 'dark'}
+                  // themeVariant={inputBg === '#fff' ? 'light' : 'dark'}
                 />
               )}
             </View>
