@@ -187,6 +187,7 @@ export default function SettingsScreen() {
     if (Platform.OS === 'web') {
       if (window.confirm('Clear All Data: Are you sure you want to delete all workouts? This cannot be undone.')) {
         await StorageService.clearWorkouts();
+        setBodyWeight('');
         showToast('Data cleared!', 'success');
       }
     } else {
@@ -200,6 +201,7 @@ export default function SettingsScreen() {
             style: 'destructive', 
             onPress: async () => {
               await StorageService.clearWorkouts();
+              setBodyWeight('');
               showToast('Data cleared!', 'success');
             }
           }
