@@ -19,9 +19,11 @@ export default function SettingsScreen() {
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   
   // Auth State
-  const { user, signInWithOtp, signOut } = useAuth();
+  const { user, signInWithOtp, verifyOtp, signOut, deleteAccount } = useAuth();
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
   const inputBg = useThemeColor({}, 'card');
@@ -31,6 +33,7 @@ export default function SettingsScreen() {
   const headerBg = useThemeColor({}, 'headerBackground');
   const borderColor = useThemeColor({}, 'border');
   const iconColor = useThemeColor({}, 'icon');
+  const dangerColor = useThemeColor({}, 'danger');
   
   const { showToast } = useToast();
 
@@ -73,14 +76,63 @@ export default function SettingsScreen() {
     if (error) {
       showToast(error.message, 'error');
     } else {
-      showToast('Check your email for the login link!', 'success');
+      showToast('Check your email for the login link or code!', 'success');
+      setShowOtpInput(true);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length !== 8) {
+      showToast('Please enter a valid 8-digit code.', 'error');
+      return;
+    }
+    const { error } = await verifyOtp(email, otp);
+    if (error) {
+      showToast(error.message, 'error');
+    } else {
+      showToast('Signed in successfully!', 'success');
       setIsLoginModalVisible(false);
+      setShowOtpInput(false);
+      setOtp('');
     }
   };
 
   const handleSignOut = async () => {
     await signOut();
     showToast('Signed out successfully.', 'success');
+  };
+
+  const handleDeleteAccount = async () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Delete Account: Are you sure? This will permanently delete all your data from the cloud.')) {
+        const { error } = await deleteAccount();
+        if (error) {
+          showToast('Failed to delete account: ' + error.message, 'error');
+        } else {
+          showToast('Account deleted.', 'success');
+        }
+      }
+    } else {
+      Alert.alert(
+        'Delete Account',
+        'Are you sure? This will permanently delete all your data from the cloud.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Delete', 
+            style: 'destructive', 
+            onPress: async () => {
+              const { error } = await deleteAccount();
+              if (error) {
+                showToast('Failed to delete account: ' + error.message, 'error');
+              } else {
+                showToast('Account deleted.', 'success');
+              }
+            }
+          }
+        ]
+      );
+    }
   };
 
   const handleSync = async () => {
@@ -206,14 +258,29 @@ export default function SettingsScreen() {
           <ThemedListItem 
             title="Import CSV" 
             onPress={handleImport} 
+            isLast
           />
+        </View>
+
+        <View style={styles.section}>
+          <ThemedText type="subtitle" style={[styles.sectionHeader, { color: dangerColor }]}>Danger Zone</ThemedText>
           <ThemedListItem 
             title="Clear All Data" 
             onPress={handleClearData} 
             variant="destructive" 
             showChevron={false}
-            isLast
+            isFirst
+            isLast={!user}
           />
+          {user && (
+            <ThemedListItem 
+              title="Delete Your Account" 
+              onPress={handleDeleteAccount} 
+              variant="destructive" 
+              showChevron={false}
+              isLast
+            />
+          )}
         </View>
       </ScrollView>
 
@@ -262,21 +329,41 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.modalContent}>
-            <ThemedText style={styles.modalLabel}>Enter your email to receive a magic link:</ThemedText>
-            <TextInput
-              style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholder="hello@example.com"
-              placeholderTextColor="#999"
-              autoFocus
-            />
-            <ThemedButton title="Send Magic Link" onPress={handleSignIn} size="large" style={{ marginTop: 20 }} />
-            <ThemedText style={[styles.hint, { marginTop: 20, textAlign: 'center' }]}>
-              We&apos;ll send you an email with a link to sign in. No password required.
-            </ThemedText>
+            {!showOtpInput ? (
+              <>
+                <ThemedText style={styles.modalLabel}>Enter your email to receive a magic link or code:</ThemedText>
+                <TextInput
+                  style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholder="hello@example.com"
+                  placeholderTextColor="#999"
+                  autoFocus
+                />
+                <ThemedButton title="Send Login Link/Code" onPress={handleSignIn} size="large" style={{ marginTop: 20 }} />
+                <ThemedText style={[styles.hint, { marginTop: 20, textAlign: 'center' }]}>
+                  We&apos;ll send you an email. You can click the link or enter the code manually.
+                </ThemedText>
+              </>
+            ) : (
+              <>
+                <ThemedText style={styles.modalLabel}>Enter the 8-digit code from your email:</ThemedText>
+                <TextInput
+                  style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor, textAlign: 'center', letterSpacing: 8, fontSize: 24 }]}
+                  value={otp}
+                  onChangeText={setOtp}
+                  keyboardType="number-pad"
+                  maxLength={8}
+                  placeholder="12345678"
+                  placeholderTextColor="#999"
+                  autoFocus
+                />
+                <ThemedButton title="Verify Code" onPress={handleVerifyOtp} size="large" style={{ marginTop: 20 }} />
+                <ThemedButton title="Back" onPress={() => setShowOtpInput(false)} variant="ghost" style={{ marginTop: 10 }} />
+              </>
+            )}
           </View>
         </ThemedView>
       </ThemedModal>

@@ -7,7 +7,9 @@ type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   signInWithOtp: (email: string) => Promise<{ error: any }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
+  deleteAccount: () => Promise<{ error: any }>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,7 +17,9 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   signInWithOtp: async () => ({ error: null }),
+  verifyOtp: async () => ({ error: null }),
   signOut: async () => ({ error: null }),
+  deleteAccount: async () => ({ error: null }),
 });
 
 export function useAuth() {
@@ -48,9 +52,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       options: {
         shouldCreateUser: true,
-        // This redirect URL must be added to your Supabase project's Authentication > URL Configuration > Redirect URLs
         emailRedirectTo: 'aerobic://', 
       },
+    });
+    return { error };
+  };
+
+  const verifyOtp = async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
     });
     return { error };
   };
@@ -60,8 +72,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+  const deleteAccount = async () => {
+    if (!user) return { error: 'No user logged in' };
+
+    // Delete user data
+    const { error: workoutsError } = await supabase
+      .from('workouts')
+      .delete()
+      .eq('user_id', user.id);
+    
+    if (workoutsError) return { error: workoutsError };
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', user.id);
+
+    if (profileError) return { error: profileError };
+
+    // Sign out
+    return signOut();
+  };
+
   return (
-    <AuthContext.Provider value={{ session, user, isLoading, signInWithOtp, signOut }}>
+    <AuthContext.Provider value={{ session, user, isLoading, signInWithOtp, verifyOtp, signOut, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );
