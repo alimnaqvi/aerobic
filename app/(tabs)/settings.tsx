@@ -90,8 +90,8 @@ export default function SettingsScreen() {
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp || otp.length !== 6) {
-      showToast('Please enter a valid 6-digit code.', 'error');
+    if (!otp || otp.length !== 8) {
+      showToast('Please enter a valid 8-digit code.', 'error');
       return;
     }
     const { error } = await verifyOtp(email, otp);
