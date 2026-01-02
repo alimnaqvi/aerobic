@@ -29,7 +29,7 @@ export function PersonalRecordsModal({ visible, onClose, workouts }: PersonalRec
   const headerBg = useThemeColor({}, 'headerBackground');
   const borderColor = useThemeColor({}, 'border');
   const iconColor = useThemeColor({}, 'icon');
-  const activeTabBg = useThemeColor({}, 'element');
+  const activeTabBg = useThemeColor({}, 'border');
   const prItemBg = useThemeColor({}, 'element');
 
   const prs = useMemo(() => {

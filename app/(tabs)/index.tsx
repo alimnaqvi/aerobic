@@ -30,7 +30,7 @@ export default function HistoryScreen() {
   const metricBg = useThemeColor({}, 'element');
   const borderColor = useThemeColor({}, 'border');
   const iconColor = useThemeColor({}, 'icon');
-  const activeTabBg = useThemeColor({}, 'element');
+  const activeTabBg = useThemeColor({}, 'border');
 
   useEffect(() => {
     navigation.setOptions({
