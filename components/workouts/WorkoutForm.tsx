@@ -199,7 +199,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               style={inputStyle}
               value={duration}
               onChangeText={setDuration}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               placeholder="40"
               placeholderTextColor={placeholderColor}
             />
@@ -211,7 +211,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               style={inputStyle}
               value={watts}
               onChangeText={setWatts}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               placeholder="130"
               placeholderTextColor={placeholderColor}
             />
@@ -223,7 +223,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               style={inputStyle}
               value={distance}
               onChangeText={setDistance}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               placeholder="5.0"
               placeholderTextColor={placeholderColor}
             />
@@ -235,7 +235,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               style={inputStyle}
               value={heartRate}
               onChangeText={setHeartRate}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               placeholder="145"
               placeholderTextColor={placeholderColor}
             />
@@ -259,7 +259,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               style={inputStyle}
               value={incline}
               onChangeText={setIncline}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               placeholder="0"
               placeholderTextColor={placeholderColor}
             />
@@ -271,7 +271,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               style={inputStyle}
               value={bodyWeight}
               onChangeText={setBodyWeight}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               placeholder="70.0"
               placeholderTextColor={placeholderColor}
             />

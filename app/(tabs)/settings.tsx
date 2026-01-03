@@ -318,7 +318,7 @@ export default function SettingsScreen() {
               style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
               value={tempWeight}
               onChangeText={setTempWeight}
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               placeholder="70.0"
               placeholderTextColor="#999"
               autoFocus
