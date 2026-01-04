@@ -113,7 +113,7 @@ export default function SettingsScreen() {
       if (error) {
         showToast(error.message, 'error', { hideInRoot: true });
       } else {
-        showToast('Check your email for the login link or code!', 'success', { hideInRoot: true });
+        showToast('Check your email for the login code!', 'success', { hideInRoot: true });
         setShowOtpInput(true);
       }
     } finally {
@@ -462,7 +462,7 @@ export default function SettingsScreen() {
           <View style={styles.modalContent}>
             {!showOtpInput ? (
               <>
-                <ThemedText style={styles.modalLabel}>Enter your email to receive a magic link or code:</ThemedText>
+                <ThemedText style={styles.modalLabel}>Enter your email to receive a login code:</ThemedText>
                 <TextInput
                   style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
                   value={email}
@@ -474,14 +474,14 @@ export default function SettingsScreen() {
                   autoFocus
                 />
                 <ThemedButton 
-                  title="Send Login Link/Code" 
+                  title="Send Login Code" 
                   onPress={handleSignIn} 
                   size="large" 
                   style={{ marginTop: 20 }} 
                   isLoading={isAuthLoading}
                 />
                 <ThemedText style={[styles.hint, { marginTop: 20, textAlign: 'center' }]}>
-                  We&apos;ll send you an email. You can click the link or enter the code manually.
+                  We&apos;ll send you an email with the code.
                 </ThemedText>
               </>
             ) : (
