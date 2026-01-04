@@ -8,7 +8,7 @@ import { StorageService } from '@/services/storage';
 import { WorkoutLog, Zone } from '@/types/workout';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, GestureResponderEvent, Modal, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, FlatList, GestureResponderEvent, Modal, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type FilterZone = 'All' | Zone;
 
@@ -99,8 +99,9 @@ export default function HistoryScreen() {
   };
 
   const openMenu = (event: GestureResponderEvent, id: string) => {
-    const { pageY } = event.nativeEvent;
-    setMenuPosition({ top: pageY + 10, right: 16 });
+    const { pageY, pageX } = event.nativeEvent;
+    const windowWidth = Dimensions.get('window').width;
+    setMenuPosition({ top: pageY + 10, right: windowWidth - pageX });
     setActiveWorkoutId(id);
     setMenuVisible(true);
   };

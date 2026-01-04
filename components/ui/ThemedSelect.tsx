@@ -1,10 +1,9 @@
 import { useThemeColor } from '@/hooks/use-theme-color';
-import React, { useState } from 'react';
-import { FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { FlatList, Modal, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Dimensions } from 'react-native';
 import { ThemedText } from '../themed-text';
 import { IconSymbol } from './icon-symbol';
 import { ThemedButton } from './ThemedButton';
-import { ThemedModal } from './ThemedModal';
 
 interface ThemedSelectProps {
   label?: string;
@@ -23,19 +22,40 @@ export function ThemedSelect({
   onAddOption,
   placeholder = 'Select an option'
 }: ThemedSelectProps) {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [newOption, setNewOption] = useState('');
+  const [dropdownLayout, setDropdownLayout] = useState({ top: 0, left: 0, width: 0 });
+  const triggerRef = useRef<React.ComponentRef<typeof TouchableOpacity>>(null);
 
   const backgroundColor = useThemeColor({}, 'card');
   const borderColor = useThemeColor({}, 'border');
   const textColor = useThemeColor({}, 'text');
   const placeholderColor = useThemeColor({}, 'placeholder');
-  const iconColor = useThemeColor({}, 'icon');
+
+  const openDropdown = () => {
+    triggerRef.current?.measureInWindow((x: number, y: number, width: number, height: number) => {
+      const windowWidth = Dimensions.get('window').width;
+      const dropdownWidth = Math.max(width, 200);
+      let left = x;
+      
+      // If dropdown goes off-screen to the right, align it to the right edge of the screen with some padding
+      if (x + dropdownWidth > windowWidth - 16) {
+        left = Math.max(16, windowWidth - dropdownWidth - 16);
+      }
+
+      setDropdownLayout({
+        top: y + height + 4,
+        left: left,
+        width: width,
+      });
+      setVisible(true);
+    });
+  };
 
   const handleSelect = (option: string) => {
     onValueChange(option);
-    setModalVisible(false);
+    setVisible(false);
   };
 
   const handleAdd = () => {
@@ -44,12 +64,12 @@ export function ThemedSelect({
       onValueChange(newOption.trim());
       setNewOption('');
       setIsAdding(false);
-      setModalVisible(false);
+      setVisible(false);
     }
   };
 
   const handleClose = () => {
-    setModalVisible(false);
+    setVisible(false);
     setIsAdding(false);
   };
 
@@ -57,85 +77,98 @@ export function ThemedSelect({
     <View>
       {label && <ThemedText style={styles.label}>{label}</ThemedText>}
       <TouchableOpacity 
+        ref={triggerRef}
         style={[styles.selector, { backgroundColor, borderColor }]} 
-        onPress={() => setModalVisible(true)}
+        onPress={openDropdown}
       >
-        <ThemedText style={{ color: value ? textColor : placeholderColor }}>
+        <ThemedText style={{ color: value ? textColor : placeholderColor, flex: 1 }} numberOfLines={1}>
           {value || placeholder}
         </ThemedText>
         <IconSymbol name="chevron.down" size={20} color={textColor} />
       </TouchableOpacity>
 
-      <ThemedModal
-        visible={modalVisible}
-        onClose={handleClose}
-        animationType="slide"
-        presentationStyle="pageSheet"
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleClose}
       >
-        <View style={[styles.modalContainer, { backgroundColor }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: borderColor }]}>
-            <ThemedText type="subtitle">{isAdding ? "Add New Option" : (label || "Select Option")}</ThemedText>
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <IconSymbol name="xmark.circle.fill" size={24} color={iconColor} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.modalContent}>
-            {!isAdding ? (
-              <>
-                <FlatList
-                  data={options}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
+        <TouchableWithoutFeedback onPress={handleClose}>
+          <View style={styles.overlay}>
+            <View 
+              style={[
+                styles.dropdown, 
+                { 
+                  top: dropdownLayout.top, 
+                  left: dropdownLayout.left, 
+                  width: Math.max(dropdownLayout.width, 200),
+                  backgroundColor, 
+                  borderColor,
+                }
+              ]}
+              onStartShouldSetResponder={() => true}
+            >
+              {!isAdding ? (
+                <>
+                  <FlatList
+                    data={options}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity 
+                        style={[styles.option, { borderBottomColor: borderColor }, item === value && styles.selectedOption]} 
+                        onPress={() => handleSelect(item)}
+                      >
+                        <ThemedText style={{ fontWeight: item === value ? 'bold' : 'normal' }}>
+                          {item}
+                        </ThemedText>
+                        {item === value && <IconSymbol name="checkmark" size={16} color={textColor} />}
+                      </TouchableOpacity>
+                    )}
+                    style={styles.list}
+                    nestedScrollEnabled={true}
+                  />
+                  {onAddOption && (
                     <TouchableOpacity 
-                      style={[styles.option, { borderBottomColor: borderColor }, item === value && styles.selectedOption]} 
-                      onPress={() => handleSelect(item)}
+                      style={[styles.addButton, { borderTopColor: borderColor }]}
+                      onPress={() => setIsAdding(true)}
                     >
-                      <ThemedText style={{ fontWeight: item === value ? 'bold' : 'normal' }}>
-                        {item}
-                      </ThemedText>
-                      {item === value && <IconSymbol name="checkmark" size={20} color={textColor} />}
+                      <IconSymbol name="plus.circle.fill" size={20} color={textColor} />
+                      <ThemedText>Add New...</ThemedText>
                     </TouchableOpacity>
                   )}
-                  style={styles.list}
-                />
-                {onAddOption && (
-                  <ThemedButton 
-                    title="Add New..." 
-                    onPress={() => setIsAdding(true)} 
-                    variant="ghost"
-                    style={styles.addButton}
+                </>
+              ) : (
+                <View style={styles.addContainer}>
+                  <ThemedText type="subtitle" style={{marginBottom: 8}}>Add New Option</ThemedText>
+                  <TextInput
+                    style={[styles.input, { color: textColor, borderColor, backgroundColor }]}
+                    value={newOption}
+                    onChangeText={setNewOption}
+                    placeholder="Enter name"
+                    placeholderTextColor={placeholderColor}
+                    autoFocus
                   />
-                )}
-              </>
-            ) : (
-              <View style={styles.addContainer}>
-                <TextInput
-                  style={[styles.input, { color: textColor, borderColor, backgroundColor }]}
-                  value={newOption}
-                  onChangeText={setNewOption}
-                  placeholder="Enter new option name"
-                  placeholderTextColor={placeholderColor}
-                  autoFocus
-                />
-                <View style={styles.addActions}>
-                  <ThemedButton 
-                    title="Cancel" 
-                    onPress={() => setIsAdding(false)} 
-                    variant="ghost" 
-                    style={{ flex: 1 }}
-                  />
-                  <ThemedButton 
-                    title="Add" 
-                    onPress={handleAdd} 
-                    style={{ flex: 1 }}
-                  />
+                  <View style={styles.addActions}>
+                    <ThemedButton 
+                      title="Cancel" 
+                      onPress={() => setIsAdding(false)} 
+                      variant="ghost" 
+                      size="small"
+                      style={{ flex: 1 }}
+                    />
+                    <ThemedButton 
+                      title="Add" 
+                      onPress={handleAdd} 
+                      size="small"
+                      style={{ flex: 1 }}
+                    />
+                  </View>
                 </View>
-              </View>
-            )}
+              )}
+            </View>
           </View>
-        </View>
-      </ThemedModal>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 }
@@ -155,51 +188,54 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     minHeight: 48,
   },
-  modalContainer: {
+  overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)',
   },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  modalContent: {
-    padding: 20,
-    flex: 1,
+  dropdown: {
+    position: 'absolute',
+    borderRadius: 8,
+    borderWidth: 1,
+    maxHeight: 300,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    overflow: 'hidden',
   },
   list: {
-    flex: 1,
+    maxHeight: 250,
   },
   option: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   selectedOption: {
     backgroundColor: 'rgba(0,0,0,0.05)',
   },
   addButton: {
-    marginTop: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderTopWidth: 1,
   },
   addContainer: {
-    gap: 16,
+    padding: 16,
   },
   input: {
     borderWidth: 1,
-    padding: 12,
-    borderRadius: 8,
+    padding: 8,
+    borderRadius: 6,
     fontSize: 16,
+    marginBottom: 12,
   },
   addActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
   },
 });
