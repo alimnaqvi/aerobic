@@ -2,7 +2,7 @@
 
 'Aerobic' is a fully cross-platform (iOS, Android, Web) React Native Expo app built for logging aerobic workouts (Zone 2 and Zone 5 / VO2 Max) and viewing history with insights such as personal records and a calendar view.
 
-The app is currently in active development. It is fully usable on the web at [aerobic.vercel.app](https://aerobic.vercel.app/). All features can be used locally without signing in. Optionally, sign in to sync your workouts to the cloud for multi-device access. Login is passwordless via email OTP.
+The app is currently in active development. It is fully usable on the web at [aerobic.vercel.app](https://aerobic.vercel.app/) (not yet available on app stores). All features can be used locally without signing in. Optionally, sign in to sync your workouts to the cloud for multi-device access. Login is passwordless via email OTP.
 
 ## What problem does this app solve?
 
@@ -50,6 +50,7 @@ There are countless workout tracking apps, but many are cluttered with features 
 
 ## Future Roadmap
 
+- Publish on Apple App Store and Google Play Store after beta testing and necessary reviews
 - Detailed charts for visualizing workout history and specific metrics.
 - Advanced filters for history screen (duration range, calories range, etc.).
 - Swipe actions for quick Edit/Delete in history.
