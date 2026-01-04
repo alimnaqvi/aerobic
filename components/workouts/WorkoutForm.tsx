@@ -98,7 +98,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
       calories: calories ? parseInt(calories) : undefined,
       incline: incline ? parseFloat(incline) : undefined,
       bodyWeightKg: bodyWeight ? parseFloat(bodyWeight) : undefined,
-      notes: notes || undefined,
+      notes: notes,
     };
     onSubmit(workout);
   };
