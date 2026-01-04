@@ -1,50 +1,57 @@
-# Welcome to your Expo app 👋
+# Aerobic Workout Logging App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+'Aerobic' is a fully cross-platform (iOS, Android, Web) React Native Expo app built for logging aerobic workouts (Zone 2 and Zone 5 / VO2 Max) and viewing history with insights such as personal records and a calendar view.
 
-## Get started
+The app is currently in active development. It is fully usable on the web at [aerobic.vercel.app](https://aerobic.vercel.app/). All features can be used locally without signing in. Optionally, sign in to sync your workouts to the cloud for multi-device access. Login is passwordless via email OTP.
 
-1. Install dependencies
+## What problem does this app solve?
 
+There are countless workout tracking apps, but many are cluttered with features irrelevant to endurance training or rely heavily on automatic smartwatch syncing which can be unreliable or lack context.
+
+'Aerobic' is designed for athletes who prefer **manual logging** to ensure data accuracy (e.g., logging average watts from a gym bike or specific heart rate targets). It focuses specifically on **Zone 2 (Aerobic Efficiency)** and **Zone 5 (Maximum Aerobic Output)** training (inspired by [Peter Attia](https://peterattiamd.com/)), providing specific insights like **Watts/kg** progression over time, which generic trackers often miss.
+
+## Features
+
+- **Focused Logging**: Specialized fields for Duration, Watts, Distance, Heart Rate, Calories, Incline, and Body Weight.
+- **Smart Defaults**: The app remembers your last workout settings for specific exercises to speed up logging.
+- **Advanced Metrics**: Automatically calculates **Watts/kg**, **Speed (km/h)**, and **Pace (min/km)**.
+- **Insights**:
+  - **Personal Records**: Track bests for Duration, Watts, and Distance across different timeframes.
+  - **Calendar View**: Visual overview of training consistency.
+  - **Filtering**: Easily filter history by Zone 2 or Zone 5.
+- **Data Ownership**:
+  - **Local First**: Works completely offline.
+  - **Cloud Sync**: Optional Supabase integration to sync data across devices.
+  - **CSV Support**: Full Export and Import functionality.
+- **Customization**: Add your own custom exercise types.
+- **UI/UX**: Full Dark Mode support and responsive design for Web and Mobile.
+
+## Tech Stack
+
+- **Framework**: [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/)
+- **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Backend/Auth**: [Supabase](https://supabase.com/) (PostgreSQL)
+- **Storage**: AsyncStorage (Local) & Supabase (Cloud)
+- **Deployment**: Vercel (Web)
+- **Utilities**: `papaparse` (CSV), `expo-file-system`
+
+## Running Locally
+
+1. Clone the repository
+2. Install dependencies:
    ```bash
    npm install
    ```
-
-2. Start the app
-
+3. Start the server:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Future Roadmap
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Detailed charts for visualizing workout history and specific metrics.
+- Advanced filters for history screen (duration range, calories range, etc.).
+- Swipe actions for quick Edit/Delete in history.
+- Data validation warnings for unrealistic inputs.
+- Email CSV reports directly from the app.
