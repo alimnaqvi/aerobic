@@ -284,7 +284,6 @@ export default function SettingsScreen() {
             onPress={() => setIsExercisesModalVisible(true)}
             isLast
           />
-          <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
         </View>
 
         <View style={styles.section}>
@@ -348,6 +347,7 @@ export default function SettingsScreen() {
               placeholderTextColor="#999"
               autoFocus
             />
+            <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
             <ThemedButton title="Save" onPress={handleSaveWeight} size="large" style={{ marginTop: 20 }} />
             <ThemedButton title="Clear" onPress={handleClearWeight} variant="ghost" style={{ marginTop: 10 }} />
           </View>
@@ -504,8 +504,8 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: 12,
     color: '#666',
-    marginTop: 8,
-    marginLeft: 16,
+    // marginTop: 8,
+    // marginLeft: 16,
   },
   modalContainer: {
     flex: 1,
