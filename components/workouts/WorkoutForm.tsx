@@ -140,12 +140,25 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
     reset: handleReset
   }));
 
+  const formatLocalDateInputValue = (value: Date) => {
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, '0');
+    const d = String(value.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
   const onDateChange = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
     if (Platform.OS === 'android') {
       setShowDatePicker(false);
     }
     setDate(currentDate);
+  };
+
+  const onWebDateChange = (nextValue: string) => {
+    const [y, m, d] = nextValue.split('-').map((v) => parseInt(v, 10));
+    if (!y || !m || !d) return;
+    setDate(new Date(y, m - 1, d));
   };
 
   const inputStyle = [
@@ -166,6 +179,24 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Date</ThemedText>
             <View style={styles.inputContainer}>
+              {Platform.OS === 'web' && (
+                <View style={[styles.dateButton, { backgroundColor: inputBg, borderColor: inputBorder, minWidth: 160 }]}>
+                  <input
+                    type="date"
+                    value={formatLocalDateInputValue(date)}
+                    onChange={(e) => onWebDateChange(e.currentTarget.value)}
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      outline: 'none',
+                      color: textColor,
+                      fontSize: 16,
+                      padding: 0,
+                    }}
+                  />
+                </View>
+              )}
               {Platform.OS === 'android' && (
                 <TouchableOpacity 
                   onPress={() => setShowDatePicker(true)} 
@@ -174,7 +205,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
                   <ThemedText>{date.toISOString().split('T')[0]}</ThemedText>
                 </TouchableOpacity>
               )}
-              {(showDatePicker || Platform.OS === 'ios') && (
+              {Platform.OS !== 'web' && (showDatePicker || Platform.OS === 'ios') && (
                 <DateTimePicker
                   testID="dateTimePicker"
                   value={date}
@@ -351,7 +382,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 8,
-    borderRadius: 5,
+    borderRadius: 6,
     backgroundColor: '#fff',
     textAlign: 'right',
     maxWidth: 80,
@@ -370,8 +401,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 6,
     backgroundColor: '#fff',
+    alignItems: 'center',
   },
   datePicker: {
     alignSelf: 'flex-end',
@@ -383,7 +415,7 @@ const styles = StyleSheet.create({
   segmentedControl: {
     flexDirection: 'row',
     backgroundColor: '#eee',
-    borderRadius: 8,
+    borderRadius: 6,
     padding: 2,
     marginLeft: 10,
   },
