@@ -10,6 +10,7 @@ import { useToast } from '@/context/ToastContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { CsvService } from '@/services/csv';
 import { StorageService } from '@/services/storage';
+import { DEFAULT_WORKOUT_TYPES } from '@/types/workout';
 import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Keyboard, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -18,6 +19,10 @@ export default function SettingsScreen() {
   const [bodyWeight, setBodyWeight] = useState('');
   const [tempWeight, setTempWeight] = useState('');
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
+  
+  const [isExercisesModalVisible, setIsExercisesModalVisible] = useState(false);
+  const [customTypes, setCustomTypes] = useState<string[]>([]);
+  const [newType, setNewType] = useState('');
   
   // Auth State
   const { user, signInWithOtp, verifyOtp, signOut, deleteAccount } = useAuth();
@@ -49,6 +54,7 @@ export default function SettingsScreen() {
     } else {
       setBodyWeight('');
     }
+    setCustomTypes(settings.workoutTypes || []);
   };
 
   const openWeightModal = () => {
@@ -74,6 +80,20 @@ export default function SettingsScreen() {
     setTempWeight('');
     setIsWeightModalVisible(false);
     showToast('Body weight cleared!', 'success');
+  };
+
+  const handleAddType = async () => {
+    if (!newType.trim()) return;
+    await StorageService.addWorkoutType(newType.trim());
+    setCustomTypes(prev => [...prev, newType.trim()]);
+    setNewType('');
+    showToast('Exercise added!', 'success');
+  };
+
+  const handleDeleteType = async (type: string) => {
+    await StorageService.deleteWorkoutType(type);
+    setCustomTypes(prev => prev.filter(t => t !== type));
+    showToast('Exercise removed!', 'success');
   };
 
   const handleSignIn = async () => {
@@ -257,6 +277,11 @@ export default function SettingsScreen() {
             value={bodyWeight ? `${bodyWeight} kg` : 'Not set'}
             onPress={openWeightModal}
             isFirst
+          />
+          <ThemedListItem 
+            title="Manage Exercises" 
+            value={`${customTypes.length} custom`}
+            onPress={() => setIsExercisesModalVisible(true)}
             isLast
           />
           <ThemedText style={styles.hint}>Used to calculate Watts/kg</ThemedText>
@@ -325,6 +350,57 @@ export default function SettingsScreen() {
             />
             <ThemedButton title="Save" onPress={handleSaveWeight} size="large" style={{ marginTop: 20 }} />
             <ThemedButton title="Clear" onPress={handleClearWeight} variant="ghost" style={{ marginTop: 10 }} />
+          </View>
+          <Toast 
+            message={toastMessage} 
+            type={toastType} 
+            visible={toastVisible} 
+            onDismiss={hideToast} 
+          />
+        </ThemedView>
+      </ThemedModal>
+
+      <ThemedModal
+        visible={isExercisesModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onClose={() => setIsExercisesModalVisible(false)}
+      >
+        <ThemedView style={[styles.modalContainer, { backgroundColor: modalBg }]}>
+          <View style={[styles.modalHeader, { backgroundColor: headerBg, borderBottomColor: borderColor }]}>
+            <ThemedText type="title">Manage Exercises</ThemedText>
+            <TouchableOpacity onPress={() => setIsExercisesModalVisible(false)} style={styles.closeButton}>
+              <IconSymbol name="xmark.circle.fill" size={30} color={iconColor} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalContent}>
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+              <TextInput
+                style={[styles.input, { flex: 1, marginBottom: 0, backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
+                value={newType}
+                onChangeText={setNewType}
+                placeholder="New Exercise Name"
+                placeholderTextColor="#999"
+              />
+              <ThemedButton title="Add" onPress={handleAddType} />
+            </View>
+            
+            <ScrollView>
+              {DEFAULT_WORKOUT_TYPES.map(type => (
+                <View key={type} style={[styles.exerciseItem, { borderBottomColor: borderColor }]}>
+                  <ThemedText>{type} (Default)</ThemedText>
+                </View>
+              ))}
+              {customTypes.map(type => (
+                <View key={type} style={[styles.exerciseItem, { borderBottomColor: borderColor }]}>
+                  <ThemedText>{type}</ThemedText>
+                  <TouchableOpacity onPress={() => handleDeleteType(type)}>
+                    <IconSymbol name="trash" size={20} color={dangerColor} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
           </View>
           <Toast 
             message={toastMessage} 
@@ -457,5 +533,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontSize: 18,
     marginBottom: 10,
+  },
+  exerciseItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
 });

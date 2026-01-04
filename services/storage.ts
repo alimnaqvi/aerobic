@@ -7,6 +7,7 @@ const SETTINGS_KEY = '@aerobic_settings';
 
 export interface UserSettings {
   bodyWeightKg?: number;
+  workoutTypes?: string[];
 }
 
 export const StorageService = {
@@ -17,13 +18,16 @@ export const StorageService = {
       if (session?.user) {
         const { data, error } = await supabase
           .from('profiles')
-          .select('body_weight_kg')
+          .select('body_weight_kg, workout_types')
           .eq('id', session.user.id)
           .single();
         
         if (data && !error) {
           // Update local cache
-          const settings = { bodyWeightKg: data.body_weight_kg };
+          const settings: UserSettings = { 
+            bodyWeightKg: data.body_weight_kg,
+            workoutTypes: data.workout_types || []
+          };
           await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
           return settings;
         }
@@ -51,6 +55,7 @@ export const StorageService = {
         const updates = {
           id: session.user.id,
           body_weight_kg: settings.bodyWeightKg,
+          workout_types: settings.workoutTypes,
           updated_at: new Date(),
         };
 
@@ -82,6 +87,26 @@ export const StorageService = {
     } catch (e) {
       console.error('Failed to clear body weight', e);
     }
+  },
+
+  async getWorkoutTypes(): Promise<string[]> {
+    const settings = await this.getSettings();
+    return settings.workoutTypes || [];
+  },
+
+  async addWorkoutType(type: string): Promise<void> {
+    const settings = await this.getSettings();
+    const currentTypes = settings.workoutTypes || [];
+    if (!currentTypes.includes(type)) {
+      await this.saveSettings({ ...settings, workoutTypes: [...currentTypes, type] });
+    }
+  },
+
+  async deleteWorkoutType(type: string): Promise<void> {
+    const settings = await this.getSettings();
+    const currentTypes = settings.workoutTypes || [];
+    const newTypes = currentTypes.filter(t => t !== type);
+    await this.saveSettings({ ...settings, workoutTypes: newTypes });
   },
 
   async getWorkouts(): Promise<WorkoutLog[]> {
@@ -303,12 +328,13 @@ export const StorageService = {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return { pushed: 0, total: 0 };
 
-      // Sync Settings (Body Weight)
+      // Sync Settings (Body Weight & Workout Types)
       const settings = await this.getSettings();
-      if (settings.bodyWeightKg) {
+      if (settings.bodyWeightKg || settings.workoutTypes) {
         await supabase.from('profiles').upsert({
           id: session.user.id,
           body_weight_kg: settings.bodyWeightKg,
+          workout_types: settings.workoutTypes,
           updated_at: new Date(),
         });
       }

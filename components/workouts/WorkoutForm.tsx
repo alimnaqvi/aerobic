@@ -1,9 +1,10 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/ThemedButton';
+import { ThemedSelect } from '@/components/ui/ThemedSelect';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { StorageService } from '@/services/storage';
-import { WorkoutLog, WorkoutType, Zone } from '@/types/workout';
+import { DEFAULT_WORKOUT_TYPES, WorkoutLog, WorkoutType, Zone } from '@/types/workout';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
@@ -33,6 +34,22 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
   const [notes, setNotes] = useState(initialValues?.notes || '');
   const [date, setDate] = useState(initialValues?.date ? new Date(initialValues.date) : new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [availableTypes, setAvailableTypes] = useState<string[]>(DEFAULT_WORKOUT_TYPES);
+
+  useEffect(() => {
+    const loadTypes = async () => {
+      const customTypes = await StorageService.getWorkoutTypes();
+      const allTypes = Array.from(new Set([...DEFAULT_WORKOUT_TYPES, ...customTypes]));
+      setAvailableTypes(allTypes);
+    };
+    loadTypes();
+  }, []);
+
+  const handleAddType = async (newType: string) => {
+    await StorageService.addWorkoutType(newType);
+    setAvailableTypes(prev => Array.from(new Set([...prev, newType])));
+    setType(newType);
+  };
 
   const inputBg = useThemeColor({}, 'card');
   const inputBorder = useThemeColor({}, 'border');
@@ -170,20 +187,14 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Type</ThemedText>
-            <View style={[styles.segmentedControl, { backgroundColor: segmentBg }]}>
-              {(['Cycling', 'Treadmill', 'Other'] as WorkoutType[]).map((t) => (
-                <TouchableOpacity
-                  key={t}
-                  style={[styles.segmentButton, type === t && { backgroundColor: segmentActiveBg }]}
-                  onPress={() => setType(t)}
-                >
-                  <ThemedText style={[
-                    styles.segmentText, 
-                    { color: segmentTextColor },
-                    type === t && { color: segmentTextActiveColor, fontWeight: '600' }
-                  ]}>{t}</ThemedText>
-                </TouchableOpacity>
-              ))}
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <ThemedSelect
+                value={type}
+                options={availableTypes}
+                onValueChange={setType}
+                onAddOption={handleAddType}
+                placeholder="Select Type"
+              />
             </View>
           </View>
 
@@ -243,7 +254,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
           </View>
 
           <View style={styles.inputRow}>
-            <ThemedText type="subtitle" style={styles.label}>Heart Rate</ThemedText>
+            <ThemedText type="subtitle" style={styles.label}>Heart Rate (avg)</ThemedText>
             <TextInput
               style={inputStyle}
               value={heartRate}
@@ -325,7 +336,7 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   label: {
-    width: 120,
+    maxWidth: 150,
     fontSize: 16,
   },
   inputContainer: {

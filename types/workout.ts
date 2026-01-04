@@ -1,4 +1,6 @@
-export type WorkoutType = 'Treadmill' | 'Cycling' | 'Other';
+export type WorkoutType = string;
+export const DEFAULT_WORKOUT_TYPES = ['Cycling', 'Treadmill'];
+
 export type Zone = 'Zone 2' | 'Zone 5';
 
 export interface WorkoutLog {
