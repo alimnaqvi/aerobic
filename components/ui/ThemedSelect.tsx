@@ -90,7 +90,7 @@ export function ThemedSelect({
       <Modal
         visible={visible}
         transparent={true}
-        animationType="fade"
+        animationType="none"
         onRequestClose={handleClose}
       >
         <TouchableWithoutFeedback onPress={handleClose}>

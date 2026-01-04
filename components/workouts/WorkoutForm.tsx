@@ -6,7 +6,8 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 import { StorageService } from '@/services/storage';
 import { DEFAULT_WORKOUT_TYPES, WorkoutLog, WorkoutType, Zone } from '@/types/workout';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface WorkoutFormProps {
@@ -36,14 +37,16 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [availableTypes, setAvailableTypes] = useState<string[]>(DEFAULT_WORKOUT_TYPES);
 
-  useEffect(() => {
-    const loadTypes = async () => {
-      const customTypes = await StorageService.getWorkoutTypes();
-      const allTypes = Array.from(new Set([...DEFAULT_WORKOUT_TYPES, ...customTypes]));
-      setAvailableTypes(allTypes);
-    };
-    loadTypes();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const loadTypes = async () => {
+        const customTypes = await StorageService.getWorkoutTypes();
+        const allTypes = Array.from(new Set([...DEFAULT_WORKOUT_TYPES, ...customTypes]));
+        setAvailableTypes(allTypes);
+      };
+      loadTypes();
+    }, [])
+  );
 
   const handleAddType = async (newType: string) => {
     await StorageService.addWorkoutType(newType);

@@ -12,7 +12,8 @@ import { CsvService } from '@/services/csv';
 import { StorageService } from '@/services/storage';
 import { DEFAULT_WORKOUT_TYPES } from '@/types/workout';
 import * as DocumentPicker from 'expo-document-picker';
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Keyboard, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function SettingsScreen() {
@@ -43,9 +44,11 @@ export default function SettingsScreen() {
   
   const { showToast, hideToast, visible: toastVisible, message: toastMessage, type: toastType } = useToast();
 
-  useEffect(() => {
-    loadSettings();
-  }, [user]); // Reload settings when user changes (login/logout)
+  useFocusEffect(
+    useCallback(() => {
+      loadSettings();
+    }, [])
+  );
 
   const loadSettings = async () => {
     const settings = await StorageService.getSettings();
