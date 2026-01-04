@@ -47,7 +47,7 @@ export default function RootLayout() {
     <AuthProvider>
       <ToastProvider>
         <ThemeProvider value={colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme}>
-          <Stack>
+          <Stack screenOptions={{ headerTitleAlign: 'center' }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           </Stack>
