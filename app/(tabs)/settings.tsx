@@ -122,8 +122,8 @@ export default function SettingsScreen() {
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp || otp.length !== 8) {
-      showToast('Please enter a valid 8-digit code.', 'error', { hideInRoot: true });
+    if (!otp || otp.length !== 6) {
+      showToast('Please enter a valid 6-digit code.', 'error', { hideInRoot: true });
       return;
     }
     setIsAuthLoading(true);
@@ -486,13 +486,13 @@ export default function SettingsScreen() {
               </>
             ) : (
               <>
-                <ThemedText style={styles.modalLabel}>Enter the 8-digit code from your email:</ThemedText>
+                <ThemedText style={styles.modalLabel}>Enter the 6-digit code from your email:</ThemedText>
                 <TextInput
                   style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor, textAlign: 'center', letterSpacing: 8, fontSize: 24 }]}
                   value={otp}
                   onChangeText={setOtp}
                   keyboardType="number-pad"
-                  maxLength={8}
+                  maxLength={6}
                   placeholder="12345678"
                   placeholderTextColor="#999"
                   autoFocus
