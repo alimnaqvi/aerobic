@@ -17,6 +17,7 @@ interface WorkoutFormProps {
 
 export interface WorkoutFormRef {
   submit: () => void;
+  reset: () => void;
 }
 
 export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initialValues, onSubmit, submitLabel, title }, ref) => {
@@ -103,8 +104,20 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
     onSubmit(workout);
   };
 
+  const handleReset = () => {
+    setDuration('');
+    setWatts('');
+    setDistance('');
+    setHeartRate('');
+    setCalories('');
+    setIncline('');
+    setNotes('');
+    setDate(new Date());
+  };
+
   useImperativeHandle(ref, () => ({
-    submit: handleSubmit
+    submit: handleSubmit,
+    reset: handleReset
   }));
 
   const onDateChange = (event: any, selectedDate?: Date) => {

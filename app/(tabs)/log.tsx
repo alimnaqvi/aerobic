@@ -15,6 +15,13 @@ export default function LogScreen() {
 
   useEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <ThemedButton 
+          title="Clear" 
+          onPress={() => formRef.current?.reset()} 
+          variant="ghost"
+        />
+      ),
       headerRight: () => (
         <ThemedButton 
           title="Save" 

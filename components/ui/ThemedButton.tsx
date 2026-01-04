@@ -134,12 +134,12 @@ export function ThemedButton({
   );
 }
 
-// Helper to adjust opacity
-function opacity(color: string, opacity: number) {
-  // Simple hex to rgba conversion could be added here if needed
-  // For now, relying on the fact that tintColor is usually a solid hex
-  return color; 
-}
+// // Helper to adjust opacity
+// function opacity(color: string, opacity: number) {
+//   // Simple hex to rgba conversion could be added here if needed
+//   // For now, relying on the fact that tintColor is usually a solid hex
+//   return color; 
+// }
 
 const styles = StyleSheet.create({
   button: {
