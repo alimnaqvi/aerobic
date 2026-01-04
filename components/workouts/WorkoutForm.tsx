@@ -91,12 +91,12 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
       date: date.toISOString().split('T')[0],
       type,
       zone,
-      durationMinutes: parseInt(duration) || 0,
+      durationMinutes: parseFloat(duration) || 0,
       watts: watts ? parseInt(watts) : undefined,
       distanceKm: distance ? parseFloat(distance) : undefined,
       heartRate: heartRate ? parseInt(heartRate) : undefined,
       calories: calories ? parseInt(calories) : undefined,
-      incline: incline ? parseInt(incline) : undefined,
+      incline: incline ? parseFloat(incline) : undefined,
       bodyWeightKg: bodyWeight ? parseFloat(bodyWeight) : undefined,
       notes: notes || undefined,
     };
@@ -198,7 +198,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
             <TextInput
               style={inputStyle}
               value={duration}
-              onChangeText={setDuration}
+              onChangeText={(text) => setDuration(text.replace(',', '.'))}
               keyboardType="decimal-pad"
               placeholder="40"
               placeholderTextColor={placeholderColor}
@@ -211,7 +211,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               style={inputStyle}
               value={watts}
               onChangeText={setWatts}
-              keyboardType="decimal-pad"
+              keyboardType="numeric"
               placeholder="130"
               placeholderTextColor={placeholderColor}
             />
@@ -222,7 +222,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
             <TextInput
               style={inputStyle}
               value={distance}
-              onChangeText={setDistance}
+              onChangeText={(text) => setDistance(text.replace(',', '.'))}
               keyboardType="decimal-pad"
               placeholder="5.0"
               placeholderTextColor={placeholderColor}
@@ -235,7 +235,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
               style={inputStyle}
               value={heartRate}
               onChangeText={setHeartRate}
-              keyboardType="decimal-pad"
+              keyboardType="numeric"
               placeholder="145"
               placeholderTextColor={placeholderColor}
             />
@@ -258,7 +258,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
             <TextInput
               style={inputStyle}
               value={incline}
-              onChangeText={setIncline}
+              onChangeText={(text) => setIncline(text.replace(',', '.'))}
               keyboardType="decimal-pad"
               placeholder="0"
               placeholderTextColor={placeholderColor}
@@ -270,7 +270,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
             <TextInput
               style={inputStyle}
               value={bodyWeight}
-              onChangeText={setBodyWeight}
+              onChangeText={(text) => setBodyWeight(text.replace(',', '.'))}
               keyboardType="decimal-pad"
               placeholder="70.0"
               placeholderTextColor={placeholderColor}

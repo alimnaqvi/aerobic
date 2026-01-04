@@ -317,7 +317,7 @@ export default function SettingsScreen() {
             <TextInput
               style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
               value={tempWeight}
-              onChangeText={setTempWeight}
+              onChangeText={(text) => setTempWeight(text.replace(',', '.'))}
               keyboardType="decimal-pad"
               placeholder="70.0"
               placeholderTextColor="#999"
