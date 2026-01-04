@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import React from 'react';
-import { Pressable, StyleSheet, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View, ViewStyle } from 'react-native';
 
 interface ThemedListItemProps {
   title: string;
@@ -14,6 +14,7 @@ interface ThemedListItemProps {
   style?: ViewStyle;
   isLast?: boolean;
   isFirst?: boolean;
+  isLoading?: boolean;
 }
 
 export function ThemedListItem({
@@ -26,6 +27,7 @@ export function ThemedListItem({
   style,
   isLast = false,
   isFirst = false,
+  isLoading = false,
 }: ThemedListItemProps) {
   const backgroundColor = useThemeColor({}, 'card');
   const borderColor = useThemeColor({}, 'border');
@@ -34,13 +36,13 @@ export function ThemedListItem({
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={isLoading ? undefined : onPress}
       style={({ pressed }) => [
         styles.container,
         { backgroundColor },
         isFirst && styles.firstItem,
         isLast && styles.lastItem,
-        pressed && { opacity: 0.7 },
+        pressed && !isLoading && { opacity: 0.7 },
         style,
       ]}
     >
@@ -56,13 +58,19 @@ export function ThemedListItem({
         </ThemedText>
         
         <View style={styles.rightContent}>
-          {value && <ThemedText style={styles.value}>{value}</ThemedText>}
-          {showChevron && (
-            <IconSymbol 
-              name="chevron.right" 
-              size={20} 
-              color={chevronColor} 
-            />
+          {isLoading ? (
+            <ActivityIndicator size="small" color={chevronColor} />
+          ) : (
+            <>
+              {value && <ThemedText style={styles.value}>{value}</ThemedText>}
+              {showChevron && (
+                <IconSymbol 
+                  name="chevron.right" 
+                  size={20} 
+                  color={chevronColor} 
+                />
+              )}
+            </>
           )}
         </View>
       </View>

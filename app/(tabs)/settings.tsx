@@ -32,6 +32,9 @@ export default function SettingsScreen() {
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [isSignOutLoading, setIsSignOutLoading] = useState(false);
+  const [isDeleteAccountLoading, setIsDeleteAccountLoading] = useState(false);
 
   const inputBg = useThemeColor({}, 'card');
   const inputBorder = useThemeColor({}, 'border');
@@ -104,12 +107,17 @@ export default function SettingsScreen() {
       showToast('Please enter your email.', 'error', { hideInRoot: true });
       return;
     }
-    const { error } = await signInWithOtp(email);
-    if (error) {
-      showToast(error.message, 'error', { hideInRoot: true });
-    } else {
-      showToast('Check your email for the login link or code!', 'success', { hideInRoot: true });
-      setShowOtpInput(true);
+    setIsAuthLoading(true);
+    try {
+      const { error } = await signInWithOtp(email);
+      if (error) {
+        showToast(error.message, 'error', { hideInRoot: true });
+      } else {
+        showToast('Check your email for the login link or code!', 'success', { hideInRoot: true });
+        setShowOtpInput(true);
+      }
+    } finally {
+      setIsAuthLoading(false);
     }
   };
 
@@ -118,33 +126,48 @@ export default function SettingsScreen() {
       showToast('Please enter a valid 8-digit code.', 'error', { hideInRoot: true });
       return;
     }
-    const { error } = await verifyOtp(email, otp);
-    if (error) {
-      showToast(error.message, 'error', { hideInRoot: true });
-    } else {
-      showToast('Signed in successfully!', 'success', { hideInRoot: true });
-      setIsLoginModalVisible(false);
-      setShowOtpInput(false);
-      setOtp('');
-      
-      // Auto-sync after login
-      handleSync();
+    setIsAuthLoading(true);
+    try {
+      const { error } = await verifyOtp(email, otp);
+      if (error) {
+        showToast(error.message, 'error', { hideInRoot: true });
+      } else {
+        showToast('Signed in successfully!', 'success', { hideInRoot: true });
+        setIsLoginModalVisible(false);
+        setShowOtpInput(false);
+        setOtp('');
+        
+        // Auto-sync after login
+        handleSync();
+      }
+    } finally {
+      setIsAuthLoading(false);
     }
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    showToast('Signed out successfully.', 'success');
+    setIsSignOutLoading(true);
+    try {
+      await signOut();
+      showToast('Signed out successfully.', 'success');
+    } finally {
+      setIsSignOutLoading(false);
+    }
   };
 
   const handleDeleteAccount = async () => {
     if (Platform.OS === 'web') {
       if (window.confirm('Delete Account: Are you sure? This will permanently delete all your data from the cloud.')) {
-        const { error } = await deleteAccount();
-        if (error) {
-          showToast('Failed to delete account: ' + error.message, 'error');
-        } else {
-          showToast('Account deleted.', 'success');
+        setIsDeleteAccountLoading(true);
+        try {
+          const { error } = await deleteAccount();
+          if (error) {
+            showToast('Failed to delete account: ' + error.message, 'error');
+          } else {
+            showToast('Account deleted.', 'success');
+          }
+        } finally {
+          setIsDeleteAccountLoading(false);
         }
       }
     } else {
@@ -157,11 +180,16 @@ export default function SettingsScreen() {
             text: 'Delete', 
             style: 'destructive', 
             onPress: async () => {
-              const { error } = await deleteAccount();
-              if (error) {
-                showToast('Failed to delete account: ' + error.message, 'error');
-              } else {
-                showToast('Account deleted.', 'success');
+              setIsDeleteAccountLoading(true);
+              try {
+                const { error } = await deleteAccount();
+                if (error) {
+                  showToast('Failed to delete account: ' + error.message, 'error');
+                } else {
+                  showToast('Account deleted.', 'success');
+                }
+              } finally {
+                setIsDeleteAccountLoading(false);
               }
             }
           }
@@ -251,6 +279,7 @@ export default function SettingsScreen() {
                 title="Sync Now" 
                 onPress={handleSync} 
                 icon={isSyncing ? <IconSymbol name="arrow.triangle.2.circlepath" size={20} color={iconColor} /> : undefined}
+                isLoading={isSyncing}
               />
               <ThemedListItem 
                 title="Sign Out" 
@@ -258,6 +287,7 @@ export default function SettingsScreen() {
                 variant="destructive"
                 showChevron={false}
                 isLast
+                isLoading={isSignOutLoading}
               />
             </>
           ) : (
@@ -320,6 +350,7 @@ export default function SettingsScreen() {
               variant="destructive" 
               showChevron={false}
               isLast
+              isLoading={isDeleteAccountLoading}
             />
           )}
         </View>
@@ -442,7 +473,13 @@ export default function SettingsScreen() {
                   placeholderTextColor="#999"
                   autoFocus
                 />
-                <ThemedButton title="Send Login Link/Code" onPress={handleSignIn} size="large" style={{ marginTop: 20 }} />
+                <ThemedButton 
+                  title="Send Login Link/Code" 
+                  onPress={handleSignIn} 
+                  size="large" 
+                  style={{ marginTop: 20 }} 
+                  isLoading={isAuthLoading}
+                />
                 <ThemedText style={[styles.hint, { marginTop: 20, textAlign: 'center' }]}>
                   We&apos;ll send you an email. You can click the link or enter the code manually.
                 </ThemedText>
@@ -460,7 +497,13 @@ export default function SettingsScreen() {
                   placeholderTextColor="#999"
                   autoFocus
                 />
-                <ThemedButton title="Verify Code" onPress={handleVerifyOtp} size="large" style={{ marginTop: 20 }} />
+                <ThemedButton 
+                  title="Verify Code" 
+                  onPress={handleVerifyOtp} 
+                  size="large" 
+                  style={{ marginTop: 20 }} 
+                  isLoading={isAuthLoading}
+                />
                 <ThemedButton title="Back" onPress={() => setShowOtpInput(false)} variant="ghost" style={{ marginTop: 10 }} />
               </>
             )}
