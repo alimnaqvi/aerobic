@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -8,6 +9,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const isWeb = Platform.OS === 'web';
 
   return (
     <Tabs
@@ -16,6 +18,20 @@ export default function TabLayout() {
         headerShown: true,
         tabBarButton: HapticTab,
         headerTitleAlign: 'center',
+        ...(isWeb
+          ? {
+              tabBarLabelStyle: {
+                lineHeight: 12,
+                // paddingTop: 2,
+                paddingBottom: 2,
+              },
+              tabBarStyle: {
+                height: 52,
+                // paddingTop: 2,
+                paddingBottom: 2,
+              },
+            }
+          : null),
       }}>
       <Tabs.Screen
         name="index"
