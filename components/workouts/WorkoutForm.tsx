@@ -190,7 +190,7 @@ export const WorkoutForm = forwardRef<WorkoutFormRef, WorkoutFormProps>(({ initi
 
           <View style={styles.inputRow}>
             <ThemedText type="subtitle" style={styles.label}>Exercise</ThemedText>
-            <View style={{ flexShrink: 1, marginLeft: 10, minWidth: 150 }}>
+            <View style={{ flexShrink: 1, marginLeft: 10, minWidth: 100 }}>
               <ThemedSelect
                 value={type}
                 options={availableTypes}
