@@ -1,9 +1,9 @@
 import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { WorkoutLog } from '@/types/workout';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import { CalendarList } from 'react-native-calendars';
 
 interface WorkoutCalendarProps {
   visible: boolean;
@@ -15,6 +15,8 @@ export function WorkoutCalendar({ visible, onClose, workouts }: WorkoutCalendarP
   const calendarBg = useThemeColor({ light: '#ffffff', dark: '#1C1C1E' }, 'background');
   const calendarText = useThemeColor({}, 'text');
   const overlayColor = useThemeColor({ light: 'rgba(0,0,0,0.5)', dark: 'rgba(0,0,0,0.7)' }, 'background');
+
+  const [calendarWidth, setCalendarWidth] = useState<number | undefined>(undefined);
 
   const markedDates = useMemo(() => {
     const marks: any = {};
@@ -74,21 +76,32 @@ export function WorkoutCalendar({ visible, onClose, workouts }: WorkoutCalendarP
       <Pressable style={[styles.overlay, { backgroundColor: overlayColor }]} onPress={onClose}>
         <Pressable style={[styles.modalContent, { backgroundColor: calendarBg }]} onPress={(e) => e.stopPropagation()}>
           <ThemedText type="title" style={styles.title}>Workout Calendar</ThemedText>
-          
-          <Calendar
-            markingType={'custom'}
-            markedDates={markedDates}
-            theme={{
-              calendarBackground: calendarBg,
-              textSectionTitleColor: calendarText,
-              dayTextColor: calendarText,
-              todayTextColor: '#0a7ea4',
-              selectedDayTextColor: '#ffffff',
-              monthTextColor: calendarText,
-              indicatorColor: calendarText,
-              arrowColor: '#0a7ea4',
+
+          <View
+            style={styles.calendarContainer}
+            onLayout={(e) => {
+              const nextWidth = Math.floor(e.nativeEvent.layout.width);
+              if (!nextWidth) return;
+              setCalendarWidth((prev) => (prev === nextWidth ? prev : nextWidth));
             }}
-          />
+          >
+            <CalendarList
+              calendarWidth={calendarWidth}
+              style={styles.calendar}
+              markingType={'custom'}
+              markedDates={markedDates}
+              theme={{
+                calendarBackground: calendarBg,
+                textSectionTitleColor: calendarText,
+                dayTextColor: calendarText,
+                todayTextColor: '#0a7ea4',
+                selectedDayTextColor: '#ffffff',
+                monthTextColor: calendarText,
+                indicatorColor: calendarText,
+                arrowColor: '#0a7ea4',
+              }}
+            />
+          </View>
           
           <View style={styles.legend}>
             <View style={styles.legendItem}>
@@ -131,6 +144,13 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     marginBottom: 20,
+  },
+  calendarContainer: {
+    width: '100%',
+  },
+  calendar: {
+    height: 350,
+    width: '100%',
   },
   legend: {
     flexDirection: 'row',
