@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { WorkoutLog } from '@/types/workout';
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Dimensions, Modal, Pressable, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
 
 interface WorkoutCalendarProps {
@@ -16,7 +16,13 @@ export function WorkoutCalendar({ visible, onClose, workouts }: WorkoutCalendarP
   const calendarText = useThemeColor({}, 'text');
   const overlayColor = useThemeColor({ light: 'rgba(0,0,0,0.5)', dark: 'rgba(0,0,0,0.7)' }, 'background');
 
-  const [calendarWidth, setCalendarWidth] = useState<number | undefined>(undefined);
+  const [calendarWidth, setCalendarWidth] = useState(() => {
+    const { width: windowWidth } = Dimensions.get('window');
+    // Overlay padding (20*2) + Modal Content padding (20*2) = 80 total reduction
+    // Modal max width is 400
+    const availableWidth = Math.min(windowWidth - 40, 400); // Width of modal
+    return availableWidth - 40; // Width inside modal (minus padding)
+  });
 
   const markedDates = useMemo(() => {
     const marks: any = {};
@@ -74,24 +80,27 @@ export function WorkoutCalendar({ visible, onClose, workouts }: WorkoutCalendarP
       onRequestClose={onClose}
     >
       <Pressable style={[styles.overlay, { backgroundColor: overlayColor }]} onPress={onClose}>
-        <Pressable style={[styles.modalContent, { backgroundColor: calendarBg }]} onPress={(e) => e.stopPropagation()}>
-          <ThemedText type="title" style={styles.title}>Workout Calendar</ThemedText>
+        <TouchableWithoutFeedback onPress={() => {}}>
+          <View style={[styles.modalContent, { backgroundColor: calendarBg }]}>
+            <ThemedText type="title" style={styles.title}>Workout Calendar</ThemedText>
 
-          <View
-            style={styles.calendarContainer}
-            onLayout={(e) => {
-              const nextWidth = Math.floor(e.nativeEvent.layout.width);
-              if (!nextWidth) return;
-              setCalendarWidth((prev) => (prev === nextWidth ? prev : nextWidth));
-            }}
-          >
-            <CalendarList
-              calendarWidth={calendarWidth}
-              style={styles.calendar}
-              markingType={'custom'}
-              markedDates={markedDates}
-              theme={{
-                calendarBackground: calendarBg,
+            <View
+              style={styles.calendarContainer}
+              onLayout={(e) => {
+                const nextWidth = Math.floor(e.nativeEvent.layout.width);
+                if (!nextWidth) return;
+                setCalendarWidth((prev) => (prev === nextWidth ? prev : nextWidth));
+              }}
+            >
+              <CalendarList
+                calendarWidth={calendarWidth}
+                pastScrollRange={12}
+                futureScrollRange={12}
+                style={styles.calendar}
+                markingType={'custom'}
+                markedDates={markedDates}
+                theme={{
+                  calendarBackground: calendarBg,
                 textSectionTitleColor: calendarText,
                 dayTextColor: calendarText,
                 todayTextColor: '#0a7ea4',
@@ -114,10 +123,11 @@ export function WorkoutCalendar({ visible, onClose, workouts }: WorkoutCalendarP
             </View>
           </View>
 
-          <Pressable style={styles.closeButton} onPress={onClose}>
-            <ThemedText style={styles.closeButtonText}>Close</ThemedText>
-          </Pressable>
-        </Pressable>
+            <Pressable style={styles.closeButton} onPress={onClose}>
+              <ThemedText style={styles.closeButtonText}>Close</ThemedText>
+            </Pressable>
+          </View>
+        </TouchableWithoutFeedback>
       </Pressable>
     </Modal>
   );
